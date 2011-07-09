@@ -39,15 +39,16 @@ task :poll_once_example do
     
   card_data = MingleEvents::Processors::CardData.new(mingle_access, 'test_project')
       
-  log_commenting_on_bugs_and_stories = MingleEvents::Processors::Pipeline.new([
+  log_commenting_on_high_priority_stories = MingleEvents::Processors::Pipeline.new([
       card_data,
-      MingleEvents::Processors::CardTypeFilter.new(['story', 'bug'], card_data),
+      MingleEvents::Processors::CardTypeFilter.new(['Story'], card_data),
+      MingleEvents::Processors::CustomPropertyFilter.new('Priority', 'High', card_data),
       MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
       MingleEvents::Processors::PutsPublisher.new
     ])
     
   processors_by_project = {
-    'test_project' => [log_commenting_on_bugs_and_stories]
+    'test_project' => [log_commenting_on_high_priority_stories]
   }
     
   MingleEvents::Poller.new(mingle_access, processors_by_project, state_folder).run_once  

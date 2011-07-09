@@ -8,3 +8,4 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'http_p
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'pipeline'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'puts_publisher'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'author_filter'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'custom_property_filter'))

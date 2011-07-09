@@ -10,13 +10,14 @@ module MingleEvents
       
       include HttpErrorSupport
       
-      def initialize(mingle_access, project_identifier)
+      def initialize(mingle_access, project_identifier, custom_properties = ProjectCustomProperties.new(mingle_access, project_identifier))
         @mingle_access = mingle_access
         @project_identifier = project_identifier
+        @custom_properties = custom_properties
         @card_data_by_number_and_version = nil
       end
       
-      # Capture whihc events are card events and might require data lookup. The
+      # Capture which events are card events and might require data lookup. The
       # actual data retrieval is lazy and will only occur as needed.
       def process_events(events)
         @card_events = events.select(&:card?)     
@@ -55,11 +56,18 @@ module MingleEvents
         doc.search('/results/result').map do |card_result|
           card_number = card_result.at('number').inner_text.to_i
           card_version = card_result.at('version').inner_text.to_i
+          custom_properties = {}
           @card_data_by_number_and_version[data_key(card_number, card_version)] = {
             :number => card_number,
             :version => card_version,
-            :card_type_name => card_result.at('card_type_name').inner_text
+            :card_type_name => card_result.at('card_type_name').inner_text,
+            :custom_properties => custom_properties
           }
+          card_result.children.each do |child|
+            if child.name.index("cp_") == 0
+              custom_properties[@custom_properties.property_name_for_column(child.name)] = child.inner_text
+            end
+          end
         end
       end
     

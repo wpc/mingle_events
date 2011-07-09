@@ -106,5 +106,17 @@ class Test::Unit::TestCase
     
   end
   
+  class StubProjectCustomProperties
+    
+    def initialize(property_names_by_column_names) 
+      @property_names_by_column_names = property_names_by_column_names
+    end
+    
+    def property_name_for_column(column_name)
+      @property_names_by_column_names[column_name]
+    end
+    
+  end
+  
 end
 
