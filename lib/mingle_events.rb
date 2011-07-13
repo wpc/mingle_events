@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'net/https'
 require 'yaml'
 require 'time'
