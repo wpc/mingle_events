@@ -20,5 +20,3 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'ent
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'author'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'processors'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'project_custom_properties'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'from_now'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'from_the_beginning'))
