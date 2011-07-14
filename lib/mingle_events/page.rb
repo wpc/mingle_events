@@ -21,11 +21,20 @@ module MingleEvents
     def next
       @next ||= construct_next_page
     end
+    
+    def previous
+      @previous ||= construct_previous_page
+    end
   
     private
     
     def construct_next_page
       next_url_element = page_as_document.at("feed/link[@rel='next']")
+      next_url_element.nil? ? nil : Page.new(next_url_element.attribute('href').text, @mingle_access)
+    end
+    
+    def construct_previous_page
+      next_url_element = page_as_document.at("feed/link[@rel='previous']")
       next_url_element.nil? ? nil : Page.new(next_url_element.attribute('href').text, @mingle_access)
     end
   

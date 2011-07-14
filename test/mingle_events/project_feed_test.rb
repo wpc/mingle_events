@@ -9,7 +9,8 @@ module MingleEvents
         'https://mingle.example.com/projects/atlas/events/index/103',
         'https://mingle.example.com/projects/atlas/events/index/101',
         'https://mingle.example.com/projects/atlas/events/index/100',
-        'https://mingle.example.com/projects/atlas/events/index/97'
+        'https://mingle.example.com/projects/atlas/events/index/97',
+        'https://mingle.example.com/projects/atlas/events/index/23'
         ], feed.entries.map(&:entry_id))
     end
     
