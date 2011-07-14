@@ -85,7 +85,10 @@ class Test::Unit::TestCase
       
         # feed uses path only for first page, relying upon mingle access to convert
         # to absolute URI -- might need to revisit this 'design' :)
-        '/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT
+        '/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT,
+        '/v2/projects/atlas/feeds/events.xml?page=2' => PAGE_2_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml?page=1' => PAGE_1_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml?page=3' => LATEST_PAGE_CONTENT,
       }[url]
     end
     stub
