@@ -1,5 +1,5 @@
 module MingleEvents
-  
+    
   # For a given project, polls for previously unseen events and broadcasts these events
   # to a list of processors, all interested in the project's events.
   #--
