@@ -7,8 +7,8 @@ require 'logger'
 require 'rubygems'
 require 'nokogiri'
 
+require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'http_error'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'poller'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'http_error_support'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'mingle_basic_auth_access'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'mingle_oauth_access'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'element_support'))

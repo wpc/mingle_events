@@ -4,9 +4,7 @@ module MingleEvents
   # Please only use this class to access resources over HTTPS so
   # as not to send credentials over plain-text connections.
   class MingleBasicAuthAccess
-    
-    include HttpErrorSupport
-    
+        
     BASIC_AUTH_HTTP_WARNING = %{     
 WARNING!!!
 It looks like you are using basic authentication over a plain-text HTTP connection. 
@@ -21,10 +19,25 @@ WARNING!!
       @username = username
       @password = password
     end
-
-    # Fetch HTTPResponse for the given location. Useful if you wish to handle
-    # specific response codes. If you only care about fetching the actual content
-    # on a 200, use the fetch page method.
+    
+    # Fetch the content at location via HTTP. Throws error if non-200 response.
+    def fetch_page(location) 
+      rsp = fetch_page_response(location)    
+      case rsp
+      when Net::HTTPSuccess
+        rsp.body
+      when Net::HTTPUnauthorized
+        raise HttpError.new(rsp, location, %{
+If you think you are passing correct credentials, please check 
+that you have enabled Mingle for basic authentication. 
+See <http://www.thoughtworks-studios.com/mingle/3.3/help/configuring_mingle_authentication.html>.})
+      else
+        raise HttpError.new(rsp, location) 
+      end
+    end
+    
+    private
+    
     def fetch_page_response(location)
       location = @base_url + location if location[0..0] == '/' 
       
@@ -49,22 +62,6 @@ WARNING!!
       puts "...#{Time.now - start}"
 
       rsp
-    end
-    
-    # Fetch the content at location via HTTP. Throws error if non-200 response.
-    def fetch_page(location) 
-      rsp = fetch_page_response(location)    
-      case rsp
-      when Net::HTTPSuccess
-        rsp.body
-      when Net::HTTPUnauthorized
-        raise_non_200(rsp, location, %{
-If you think you are passing correct credentials, please check 
-that you have enabled Mingle for basic authentication. 
-See <http://www.thoughtworks-studios.com/mingle/3.3/help/configuring_mingle_authentication.html>.})
-      else
-        raise_non_200(rsp, location) 
-      end
     end
 
   end

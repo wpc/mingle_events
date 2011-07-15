@@ -74,7 +74,7 @@ class Test::Unit::TestCase
     
     def initialize
       @pages_by_path = {}
-      @four_oh_fours = []
+      @not_found_pages = []
     end
     
     def register_page_content(path, content)
@@ -82,28 +82,22 @@ class Test::Unit::TestCase
     end
     
     def register_page_not_found(path)
-      @four_oh_fours << path
+      @not_found_pages << path
     end
     
     def fetch_page(path)
+      if @not_found_pages.include?(path)
+        rsp = Net::HTTPNotFound.new(nil, '404', 'Page not found!')
+        def rsp.body
+          "404!!!!!"
+        end
+        raise MingleEvents::HttpError.new(rsp, path)
+      end
+      
       raise "Attempting to fetch page at #{path}, but your test has not registered content for this path! Registered paths: #{@pages_by_path.keys.inspect}" unless @pages_by_path.key?(path)
       @pages_by_path[path]
     end
-    
-    def fetch_page_response(path)
-      if @four_oh_fours.include?(path)
-        return Net::HTTPNotFound.new(nil, '404', 'Page not found!')
-      end
-      
-      body = fetch_page(path)
-      response = Net::HTTPSuccess.new(nil, '200' , "Good!")
-      response.instance_variable_set(:@__body, body)
-      def response.body
-        @__body
-      end
-      response
-    end
-    
+        
   end
   
   class StubProjectCustomProperties

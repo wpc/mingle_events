@@ -7,9 +7,7 @@ module MingleEvents
     # which returns of has of card data for the given event. See the project README
     # for additional information on using this class in a processing pipeline.
     class CardData
-      
-      include HttpErrorSupport
-      
+            
       def initialize(mingle_access, project_identifier, custom_properties = ProjectCustomProperties.new(mingle_access, project_identifier))
         @mingle_access = mingle_access
         @project_identifier = project_identifier
@@ -72,19 +70,16 @@ module MingleEvents
       end
     
       def load_card_data_for_event(card_event)
-        http_response = @mingle_access.fetch_page_response(card_event.card_version_resource_uri)
-        case http_response
-        when Net::HTTPSuccess
-          doc = Nokogiri::XML(http_response.body)
+        begin
+          page_xml = @mingle_access.fetch_page(card_event.card_version_resource_uri)
+          doc = Nokogiri::XML(page_xml)
           {
             :number => card_event.card_number,
             :version => card_event.version,
             :card_type_name => doc.at('/card/card_type/name').inner_text
           }
-        when Net::HTTPNotFound
-          nil
-        else
-          raise_non_200(http_response, card_event.card_version_resource_uri)
+        rescue HttpError => httpError
+          raise httpError unless httpError.not_found?
         end
       end
       
