@@ -73,13 +73,21 @@ module MingleEvents
         begin
           page_xml = @mingle_access.fetch_page(card_event.card_version_resource_uri)
           doc = Nokogiri::XML(page_xml)
-          {
+          custom_properties = {}
+          result = {
             :number => card_event.card_number,
             :version => card_event.version,
-            :card_type_name => doc.at('/card/card_type/name').inner_text
+            :card_type_name => doc.at('/card/card_type/name').inner_text,
+            :custom_properties => custom_properties
           }
+          doc.search('/card/properties/property').each do |property|
+            custom_properties[property.at('name').inner_text] = property.at('value').inner_text
+          end
+          
+          result
         rescue HttpError => httpError
           raise httpError unless httpError.not_found?
+
         end
       end
       

@@ -40,7 +40,7 @@ See <http://www.thoughtworks-studios.com/mingle/3.3/help/configuring_mingle_auth
     
     def fetch_page_response(location)
       location = @base_url + location if location[0..0] == '/' 
-      
+            
       uri = URI.parse(location)
       http = Net::HTTP.new(uri.host, uri.port)
       

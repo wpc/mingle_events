@@ -29,15 +29,19 @@ end
 task :poll_once_example do
   
   state_folder = File.join(File.dirname(__FILE__), 'example_app_state') 
-  FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true '
+  cache_folder = File.join(File.dirname(__FILE__), 'example_app_feed_cache') 
+  
+  FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true'
+  FileUtils.rm_rf(cache_folder) if ENV['CLEAN'] == 'true'
   
   mingle_access = MingleEvents::MingleBasicAuthAccess.new(
     'https://mingle.example.com:7071',
     ENV['MINGLE_USER'],
     ENV['MINGLE_PASSWORD']
   )
+  mingle_access_cache = MingleEvents::MingleFeedCache.new(mingle_access, cache_folder)
     
-  card_data = MingleEvents::Processors::CardData.new(mingle_access, 'test_project')
+  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'test_project')
       
   log_commenting_on_high_priority_stories = MingleEvents::Processors::Pipeline.new([
       card_data,
@@ -51,5 +55,5 @@ task :poll_once_example do
     'test_project' => [log_commenting_on_high_priority_stories]
   }
     
-  MingleEvents::Poller.new(mingle_access, processors_by_project, state_folder).run_once  
+  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder, true).run_once  
 end

@@ -5,20 +5,20 @@ module MingleEvents
   #--
   # TODO: Need a better name for this class  
   class ProjectEventBroadcaster
-    
-    EVENT_PUBLISH_COUNT_ON_INIT = 25
         
-    def initialize(mingle_feed, event_processors, state_file, logger = Logger.new(STDOUT))
+    def initialize(mingle_feed, event_processors, state_file, initial_event_count = 25, logger = Logger.new(STDOUT))
       @mingle_feed = mingle_feed
       @event_processors = event_processors
       @state_file = state_file
+      @initial_event_count = initial_event_count
       @logger = logger
     end  
 
     # Perform the polling for new events and subsequent broadasting to interested processors
     def process_new_events
       if !initialized?
-        process_events(@mingle_feed.entries.take(EVENT_PUBLISH_COUNT_ON_INIT).reverse)
+        initial_entries = @mingle_feed.entries.take(@initial_event_count)
+        process_events(initial_entries.reverse)
         ensure_state_initialized
       else
         unseen_entries = []

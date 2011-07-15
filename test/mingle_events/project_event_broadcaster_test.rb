@@ -3,7 +3,16 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper'))
 module MingleEvents
   class ProjectEventBroadcasterTest < Test::Unit::TestCase
     
-    def test_processes_25_events_on_project_initialization
+    def test_can_broadcast_all_events_from_beginning_of_time
+      processor = DummyAbstractNoRetryProcessor.new
+      feed = DummyFeed.new
+      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file, :all)
+      event_pump.process_new_events
+      
+      assert_equal(30, processor.processed_events.count)
+    end
+    
+    def test_can_process_only_recent_history
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
       event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file)
@@ -96,7 +105,7 @@ module MingleEvents
       log_stream = StringIO.new
       event_pump = ProjectEventBroadcaster.new(
         feed, [good_processor_1, exploding_processor, good_processor_2], 
-        temp_file, Logger.new(log_stream))
+        temp_file, 25, Logger.new(log_stream))
       event_pump.process_new_events
       
       assert(log_stream.string.index('Unable to complete event processing'))
