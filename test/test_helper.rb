@@ -10,85 +10,51 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib', 'mingle_
 
 class Test::Unit::TestCase 
   
-  # page 3
-  LATEST_PAGE_CONTENT = %{
-    <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
-    
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="self"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2" rel="next"/>
-      
-      <entry>
-        <id>https://mingle.example.com/projects/atlas/events/index/103</id>
-        <title>entry 103</title>
-        <updated>2011-02-03T08:12:42Z</updated>
-        <author><name>Bob</name></author>
-      </entry>
-      <entry>
-        <id>https://mingle.example.com/projects/atlas/events/index/101</id>
-        <title>entry 101</title>
-        <updated>2011-02-03T02:09:16Z</updated>
-        <author><name>Bob</name></author>
-      </entry>
-      <entry>
-        <id>https://mingle.example.com/projects/atlas/events/index/100</id>
-        <title>entry 100</title>
-        <updated>2011-02-03T01:58:02Z</updated>
-        <author><name>Mary</name></author>
-      </entry>
-    </feed>
-  }  
+  FIRST_PAGE_CONTENT = %{
+      <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+        <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=23" rel="next"/>
+        <entry>
+          <id>https://mingle.example.com/projects/atlas/events/index/103</id>
+          <title>entry 103</title>
+          <updated>2011-02-03T08:12:42Z</updated>
+          <author><name>Bob</name></author>
+        </entry>
+        <entry>
+          <id>https://mingle.example.com/projects/atlas/events/index/101</id>
+          <title>entry 101</title>
+          <updated>2011-02-03T02:09:16Z</updated>
+          <author><name>Bob</name></author>
+        </entry>
+        <entry>
+          <id>https://mingle.example.com/projects/atlas/events/index/100</id>
+          <title>entry 100</title>
+          <updated>2011-02-03T01:58:02Z</updated>
+          <author><name>Mary</name></author>
+        </entry>
+      </feed>
+    }  
    
-  # page 2
-  PAGE_2_CONTENT = %{
-    <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
-    
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2" rel="self"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1" rel="next"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3" rel="previous"/>
-      
-      <entry>
-        <id>https://mingle.example.com/projects/atlas/events/index/97</id>
-        <title>entry 97</title>
-        <updated>2011-02-03T01:00:52Z</updated>
-        <author><name>Harry</name></author>
-      </entry>
-    </feed>
-  }    
-    
-  # page 1
-  PAGE_1_CONTENT = %{
-    <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
-    
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1" rel="self"/>
-      <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2" rel="previous"/>
-      
-      <entry>
-        <id>https://mingle.example.com/projects/atlas/events/index/23</id>
-        <title>entry 23</title>
-        <updated>2011-02-01T01:00:52Z</updated>
-        <author><name>Bob</name></author>
-      </entry>
-    </feed>
-  }      
-  
+  NEXT_PAGE_CONTENT = %{
+      <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+        <entry>
+          <id>https://mingle.example.com/projects/atlas/events/index/97</id>
+          <title>entry 97</title>
+          <updated>2011-02-03T01:00:52Z</updated>
+          <author><name>Harry</name></author>
+        </entry>
+      </feed>
+    }      
+
   def stub_mingle_access
     stub = Object.new
     def stub.fetch_page(url)
       {
-        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT,
-        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2' => PAGE_2_CONTENT,
-        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1' => PAGE_1_CONTENT,
-        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3' => LATEST_PAGE_CONTENT,
+        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=23' => NEXT_PAGE_CONTENT,
+        'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml' => FIRST_PAGE_CONTENT,
       
         # feed uses path only for first page, relying upon mingle access to convert
         # to absolute URI -- might need to revisit this 'design' :)
-        '/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT,
-        '/v2/projects/atlas/feeds/events.xml?page=2' => PAGE_2_CONTENT,
-        '/api/v2/projects/atlas/feeds/events.xml?page=1' => PAGE_1_CONTENT,
-        '/api/v2/projects/atlas/feeds/events.xml?page=3' => LATEST_PAGE_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml' => FIRST_PAGE_CONTENT
       }[url]
     end
     stub

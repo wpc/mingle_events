@@ -13,7 +13,7 @@ module MingleEvents
       assert_equal('http://example.com/entry/6', processor.processed_events.first.entry_id)
       assert_equal('http://example.com/entry/30', processor.processed_events.last.entry_id)
     end
-        
+    
     def test_initializes_new_project_even_when_no_new_events
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new(0)
