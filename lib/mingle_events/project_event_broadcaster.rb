@@ -15,26 +15,34 @@ module MingleEvents
     end  
 
     # Perform the polling for new events and subsequent broadasting to interested processors
-    def process_new_events
+    def run_once
       if !initialized?
-        initial_entries = if (@initial_event_count.nil? || @initial_event_count == :all)
-          @mingle_feed.entries.to_a
-        else
-          @mingle_feed.entries.take(@initial_event_count)
-        end
-        process_events(initial_entries.reverse)
+        process_initial_events
         ensure_state_initialized
       else
-        unseen_entries = []
-        @mingle_feed.entries.each do |entry|
-          break if entry.entry_id == last_event_id
-          unseen_entries << entry
-        end
-        process_events(unseen_entries.reverse) 
+        process_latest_events
       end
     end
 
     private
+    
+    def process_initial_events
+      initial_entries = if initial_read_is_from_beginning_of_time?
+        @mingle_feed.entries.to_a
+      else
+        @mingle_feed.entries.take(@initial_event_count)
+      end
+      process_events(initial_entries.reverse)
+    end
+    
+    def process_latest_events
+      unseen_entries = []
+      @mingle_feed.entries.each do |entry|
+        break if entry.entry_id == last_event_id
+        unseen_entries << entry
+      end
+      process_events(unseen_entries.reverse) 
+    end
         
     def process_events(events)
       @event_processors.each do |processor| 
@@ -60,6 +68,10 @@ Events: #{events}
       
       # TODO: write unit test for not writing state when events is empty (and correlate with the init scenario)
       write_last_event_seen(events.last) unless events.empty?  
+    end
+    
+    def initial_read_is_from_beginning_of_time?
+      @initial_event_count.nil? || @initial_event_count == :all
     end
     
     def last_event_id

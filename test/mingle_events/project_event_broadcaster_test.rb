@@ -6,8 +6,8 @@ module MingleEvents
     def test_can_broadcast_all_events_from_beginning_of_time_passing_all_symbol
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file, :all)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file, :all)
+      event_broadcaster.run_once
       
       assert_equal(30, processor.processed_events.count)
     end
@@ -15,8 +15,8 @@ module MingleEvents
     def test_can_broadcast_all_events_from_beginning_of_time_passing_nil
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file, nil)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file, nil)
+      event_broadcaster.run_once
       
       assert_equal(30, processor.processed_events.count)
     end
@@ -24,8 +24,8 @@ module MingleEvents
     def test_can_process_only_recent_history
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
+      event_broadcaster.run_once
       
       assert_equal(25, processor.processed_events.count)
       assert_equal('http://example.com/entry/6', processor.processed_events.first.entry_id)
@@ -36,12 +36,12 @@ module MingleEvents
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new(0)
       state_file = temp_file
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], state_file)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)
+      event_broadcaster.run_once
       
       feed = DummyFeed.new
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], state_file)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)
+      event_broadcaster.run_once
       
       # we would only get beyond a page of events if previously initialized
       assert_equal(30, processor.processed_events.count)
@@ -55,8 +55,8 @@ module MingleEvents
       
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], state_file)    
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)    
+      event_broadcaster.run_once
       
       assert_equal(
         ['http://example.com/entry/29', 'http://example.com/entry/30'], 
@@ -68,13 +68,13 @@ module MingleEvents
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new(5)
       state_file = temp_file
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
+      event_broadcaster.run_once
       assert_equal(5, processor.processed_events.count)
       
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new(0)
-      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file)
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
       assert_equal(0, processor.processed_events.count)
     end
     
@@ -82,8 +82,8 @@ module MingleEvents
       processor_1 = DummyAbstractNoRetryProcessor.new
       processor_2 = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new(2)
-      event_pump = ProjectEventBroadcaster.new(feed, [processor_1, processor_2], temp_file)
-      event_pump.process_new_events
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor_1, processor_2], temp_file)
+      event_broadcaster.run_once
       
       assert_equal(2, processor_1.processed_events.count)
       assert_equal(2, processor_2.processed_events.count)
@@ -112,10 +112,10 @@ module MingleEvents
       
       feed = DummyFeed.new(3)
       log_stream = StringIO.new
-      event_pump = ProjectEventBroadcaster.new(
+      event_broadcaster = ProjectEventBroadcaster.new(
         feed, [good_processor_1, exploding_processor, good_processor_2], 
         temp_file, 25, Logger.new(log_stream))
-      event_pump.process_new_events
+      event_broadcaster.run_once
       
       assert(log_stream.string.index('Unable to complete event processing'))
       assert_equal(
