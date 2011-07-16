@@ -57,17 +57,21 @@ module MingleEvents
               <version>11</version>
               <cp_priority>Low</cp_priority>
               <cp_estimate>5</cp_estimate>
+              <cp_completed_on nil="true" />
             </result>
           </results>
           })
           
-        dummy_custom_properties = StubProjectCustomProperties.new({'cp_priority' => 'Foo', 'cp_estimate' => 'Bar'})
+        dummy_custom_properties = StubProjectCustomProperties.new({
+          'cp_priority' => 'Foo', 'cp_estimate' => 'Bar', 'cp_completed_on' => 'Completed On'
+        })
     
         card_data = CardData.new(dummy_mingle_access, 'atlas', dummy_custom_properties)
         card_data.process_events([event_1])
         
         assert_equal("Low", card_data.for_card_event(event_1)[:custom_properties]['Foo'])
-        assert_equal("5", card_data.for_card_event(event_1)[:custom_properties]['Bar'])        
+        assert_equal("5", card_data.for_card_event(event_1)[:custom_properties]['Bar'])  
+        assert_nil card_data.for_card_event(event_1)[:custom_properties]['Completed On']      
       end
       
       def test_load_basic_card_data_when_card_has_been_updated_beyond_the_specific_event

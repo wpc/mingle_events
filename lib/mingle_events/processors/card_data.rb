@@ -63,7 +63,12 @@ module MingleEvents
           }
           card_result.children.each do |child|
             if child.name.index("cp_") == 0
-              custom_properties[@custom_properties.property_name_for_column(child.name)] = child.inner_text
+              value = if child['nil'] == "true"
+                nil
+              else
+                child.inner_text
+              end
+              custom_properties[@custom_properties.property_name_for_column(child.name)] = value
             end
           end
         end
