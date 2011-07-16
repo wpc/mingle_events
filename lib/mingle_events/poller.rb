@@ -21,7 +21,7 @@ module MingleEvents
           project_feed = ProjectFeed.new(project_identifier, @mingle_access)
           initial_event_count = @from_beginning_of_time ? :all : 25
           broadcaster = ProjectEventBroadcaster.new(project_feed, processors, state_file(project_identifier), initial_event_count)
-          broadcaster.process_new_events        
+          broadcaster.run_once        
         rescue StandardError => e
           puts "\nUnable to retrieve events for project '#{project_identifier}':"
           puts e
