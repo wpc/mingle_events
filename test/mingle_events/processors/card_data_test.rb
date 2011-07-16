@@ -3,23 +3,18 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 module MingleEvents
   module Processors
     
-    #--
-    # TODO: 
-    # 1) add test to ensure lazy loading is cached and there
-    # are not repeated calls to the server 
-    # 2) better revision resource URIs in tests -- make tests more understandable
+    # TODO:  better revision resource URIs in tests -- make tests more understandable
     class CardDataTest < Test::Unit::TestCase
   
-      def test_load_basic_card_data
+      def test_load_basic_card_data_in_bulk
         event_1 = stub_event(1, 100, 11, ['card', 'comment-addition'])
-        event_2 = stub_event(2, 101, 12, ['card', 'property-change'])
-        event_3 = stub_event(3, nil, nil, ['revision-commit'])
-        event_4 = stub_event(4, 103, 13, ['card', 'property-change'])
-        events = [event_1, event_2, event_3, event_4]
+        event_2 = stub_event(3, nil, nil, ['revision-commit'])
+        event_3 = stub_event(4, 103, 13, ['card', 'property-change'])
+        events = [event_1, event_2, event_3]
     
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
-          URI.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,101,103)'),
+          URI.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,103)'),
           %{ 
           <?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
@@ -29,13 +24,8 @@ module MingleEvents
               <version>11</version>
             </result>
             <result>
-              <number>101</number>
-              <card_type_name>bug</card_type_name>
-              <version>12</version>
-            </result>
-            <result>
               <number>103</number>
-              <card_type_name>story</card_type_name>
+              <card_type_name>bug</card_type_name>
               <version>13</version>
             </result>
           </results>
@@ -48,11 +38,8 @@ module MingleEvents
           {:number => 100, :card_type_name => 'story', :version => 11},
           card_data, event_1)
         assert_correct_basic_card_data_for_event(
-          {:number => 101, :card_type_name => 'bug', :version => 12},
-          card_data, event_2)
-        assert_correct_basic_card_data_for_event(
-          {:number => 103, :card_type_name => 'story', :version => 13},
-          card_data, event_4)
+          {:number => 103, :card_type_name => 'bug', :version => 13},
+          card_data, event_3)
       end
             
       def test_load_custom_properties
@@ -85,14 +72,13 @@ module MingleEvents
       
       def test_load_basic_card_data_when_card_has_been_updated_beyond_the_specific_event
         event_1 = stub_event(1, 100, 11, ['card', 'comment-addition'])
-        event_2 = stub_event(2, 101, 12, ['card', 'property-change'])
-        event_3 = stub_event(3, nil, nil, ['revision-commit'])
-        event_4 = stub_event(4, 103, 13, ['card', 'property-change'])
-        events = [event_1, event_2, event_3, event_4]
+        event_2 = stub_event(3, nil, nil, ['revision-commit'])
+        event_3 = stub_event(4, 103, 13, ['card', 'property-change'])
+        events = [event_1, event_2, event_3]
     
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
-          URI.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,101,103)'),
+          URI.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,103)'),
           %{ 
           <?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
@@ -102,27 +88,12 @@ module MingleEvents
               <version>11</version>
             </result>
             <result>
-              <number>101</number>
-              <card_type_name>bug</card_type_name>
-              <version>14</version>
-            </result>
-            <result>
               <number>103</number>
               <card_type_name>story</card_type_name>
               <version>15</version>
             </result>
           </results>
           })
-        dummy_mingle_access.register_page_content('http://example.com?version=12',%{
-          <card>
-            <number type="integer">101</number> 
-            <card_type url="https://localhost:7071/api/v2/projects/atlas/card_types/24.xml"> 
-              <name>issue</name> 
-            </card_type> 
-            <version type="integer">12</version>
-            <cp_estimate>5</cp_estimate> 
-          </card>
-        })
         dummy_mingle_access.register_page_content('http://example.com?version=13',%{
           <card>
             <number type="integer">103</number> 
@@ -140,11 +111,8 @@ module MingleEvents
           {:number => 100, :card_type_name => 'story', :version => 11},
           card_data, event_1)
         assert_correct_basic_card_data_for_event(
-          {:number => 101, :card_type_name => 'issue', :version => 12},
-          card_data, event_2)
-        assert_correct_basic_card_data_for_event(
           {:number => 103, :card_type_name => 'epic', :version => 13},
-          card_data, event_4)
+          card_data, event_3)
       end
       
       def test_load_custom_properties_when_card_has_been_updated_beyond_the_specific_event
