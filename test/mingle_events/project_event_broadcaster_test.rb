@@ -3,10 +3,19 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper'))
 module MingleEvents
   class ProjectEventBroadcasterTest < Test::Unit::TestCase
     
-    def test_can_broadcast_all_events_from_beginning_of_time
+    def test_can_broadcast_all_events_from_beginning_of_time_passing_all_symbol
       processor = DummyAbstractNoRetryProcessor.new
       feed = DummyFeed.new
       event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file, :all)
+      event_pump.process_new_events
+      
+      assert_equal(30, processor.processed_events.count)
+    end
+    
+    def test_can_broadcast_all_events_from_beginning_of_time_passing_nil
+      processor = DummyAbstractNoRetryProcessor.new
+      feed = DummyFeed.new
+      event_pump = ProjectEventBroadcaster.new(feed, [processor], temp_file, nil)
       event_pump.process_new_events
       
       assert_equal(30, processor.processed_events.count)

@@ -17,7 +17,11 @@ module MingleEvents
     # Perform the polling for new events and subsequent broadasting to interested processors
     def process_new_events
       if !initialized?
-        initial_entries = @mingle_feed.entries.take(@initial_event_count)
+        initial_entries = if (@initial_event_count.nil? || @initial_event_count == :all)
+          @mingle_feed.entries.to_a
+        else
+          @mingle_feed.entries.take(@initial_event_count)
+        end
         process_events(initial_entries.reverse)
         ensure_state_initialized
       else
