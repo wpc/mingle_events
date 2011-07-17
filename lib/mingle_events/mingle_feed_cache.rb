@@ -14,10 +14,14 @@ module MingleEvents
         return @source.fetch_page(path)
       end
       
-      cache_path = path_to_filename(path)
+      cache_path = path_to_cache_filename(path)
       fetch_and_cache(path, cache_path) unless File.exist?(cache_path)
       
       File.open(cache_path).readlines.join("\n")
+    end
+    
+    def cached?(path)
+      File.exist?(path_to_cache_filename(path))
     end
       
     private
@@ -33,6 +37,8 @@ module MingleEvents
       File.open(cache_path, "w") do |f|
         f << @source.fetch_page(path)
       end
+    rescue
+      FileUtils.rm_rf(cache_path)
     end
     
     def path_to_components(path)
@@ -42,7 +48,7 @@ module MingleEvents
       [path_as_uri.path, query]
     end
     
-    def path_to_filename(path)
+    def path_to_cache_filename(path)
       # http://devblog.muziboo.com/2008/06/17/attachment-fu-sanitize-filename-regex-and-unicode-gotcha/
       path_as_uri = URI.parse(path)
       path = "#{path_as_uri.path}?#{path_as_uri.query}"

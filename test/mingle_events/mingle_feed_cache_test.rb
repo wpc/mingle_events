@@ -120,6 +120,23 @@ module MingleEvents
       ])
     end
     
+    def test_errors_not_cached
+      cache = MingleFeedCache.new(ExplodingStubMingleAccess.new, temp_dir)
+      begin
+        cache.fetch_page('http://example.com/api/v2/projects/foo/feeds/events.xml?page=23')
+      rescue StandardError => e
+      end
+      assert !cache.cached?('http://example.com/api/v2/projects/foo/feeds/events.xml?page=23')
+    end
+    
+    class ExplodingStubMingleAccess
+      
+      def fetch_page(path)
+        raise "Unable to fetch #{path}!"
+      end
+      
+    end
+    
     class LoggingStubMingleAccess
       
       include Test::Unit::Assertions
