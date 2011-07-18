@@ -151,17 +151,22 @@ module MingleEvents
                   <name>Priority</name>
                   <value>High</value>
                 </property>
+                <property type_description="Managed text list" hidden="false">
+                  <name>Feature</name>
+                  <value nil="true" />
+                </property>
               </properties>
             </card>
           }
         )
         
-        dummy_custom_properties = StubProjectCustomProperties.new({'cp_priority' => 'Priority'})
+        dummy_custom_properties = StubProjectCustomProperties.new({'cp_priority' => 'Priority', 'cp_feature' => 'Feature'})
     
         card_data = CardData.new(dummy_mingle_access, 'atlas', dummy_custom_properties)
         card_data.process_events(events)
         
         assert_equal 'High', card_data.for_card_event(event_1)[:custom_properties]['Priority']
+        assert_nil card_data.for_card_event(event_1)[:custom_properties]['Feature']
       end
       
       def test_load_card_data_when_card_has_been_deleted_before_event_processing

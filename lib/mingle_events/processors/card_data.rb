@@ -63,12 +63,8 @@ module MingleEvents
           }
           card_result.children.each do |child|
             if child.name.index("cp_") == 0
-              value = if child['nil'] == "true"
-                nil
-              else
-                child.inner_text
-              end
-              custom_properties[@custom_properties.property_name_for_column(child.name)] = value
+              custom_properties[@custom_properties.property_name_for_column(child.name)] = 
+                nullable_value_from_element(child)
             end
           end
         end
@@ -86,7 +82,8 @@ module MingleEvents
             :custom_properties => custom_properties
           }
           doc.search('/card/properties/property').each do |property|
-            custom_properties[property.at('name').inner_text] = property.at('value').inner_text
+            custom_properties[property.at('name').inner_text] = 
+              nullable_value_from_element(property.at('value'))
           end
           
           result
@@ -95,7 +92,10 @@ module MingleEvents
 
         end
       end
-      
+  
+      def nullable_value_from_element(element)
+        element['nil'] == 'true' ? nil : element.inner_text
+      end
     end
     
   end
