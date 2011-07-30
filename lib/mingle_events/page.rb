@@ -21,13 +21,31 @@ module MingleEvents
     def next
       @next ||= construct_next_page
     end
+    
+    def previous
+      @previous ||= construct_previous_page
+    end
   
     private
     
     def construct_next_page
       next_url_element = page_as_document.at("feed/link[@rel='next']")
-      next_url_element.nil? ? nil : Page.new(next_url_element.attribute('href').text, @mingle_access)
+      if next_url_element.nil?
+        nil
+      else
+        Page.new(next_url_element.attribute('href').text, @mingle_access)
+      end
     end
+    
+    def construct_previous_page
+      previous_url_element = page_as_document.at("feed/link[@rel='previous']")
+      if previous_url_element.nil?
+        nil
+      else
+        Page.new(previous_url_element.attribute('href').text, @mingle_access)
+      end
+    end
+    
   
     def page_as_document
       @page_as_document ||= Nokogiri::XML(@mingle_access.fetch_page(@url))
