@@ -1,6 +1,7 @@
 h2. Urgent
 
-* Document caching
+* there's likely a bug around seeing new events against a real instance of mingle given that the 'last page' will be remembered as the un-parameterized version of the event feed.
+
 * Document :from_now v. :from_beginning_of_time
 * Restore optimizations (bulk data loading & bulk event processing) when simply getting latest events
 

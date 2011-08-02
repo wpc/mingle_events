@@ -129,6 +129,21 @@ module MingleEvents
       assert !cache.cached?('http://example.com/api/v2/projects/foo/feeds/events.xml?page=23')
     end
     
+    def test_cache_can_be_cleared
+      source = LoggingStubMingleAccess.new(
+        'http://example.com/api/v2/projects/foo/feeds/events.xml?page=23' => 'foo feed content'
+      )
+      cache = MingleFeedCache.new(source, temp_dir)
+      assert_equal 'foo feed content', cache.fetch_page('http://example.com/api/v2/projects/foo/feeds/events.xml?page=23')
+      cache.clear
+      assert_equal 'foo feed content', cache.fetch_page('http://example.com/api/v2/projects/foo/feeds/events.xml?page=23')
+      source.assert_fetches([
+        'http://example.com/api/v2/projects/foo/feeds/events.xml?page=23',
+        'http://example.com/api/v2/projects/foo/feeds/events.xml?page=23'
+      ])
+    end
+    
+    
     class ExplodingStubMingleAccess
       
       def fetch_page(path)

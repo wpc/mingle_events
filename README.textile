@@ -124,6 +124,12 @@ Be absolutely sure that any processor you write returns a list of events. If you
 
 Each event that is passed to the processor is an instance of type MingleEvents::Entry which is a Ruby wrapper around an Atom event. The Entry class makes it easy to access information such as author, Atom categories, whether the event was sourced by a card, etc. As the model is not yet complete, the Entry class also exposes the raw XML of the entry.
 
+h2. Caching Mingle requests
+
+If you are doing historical analysis of Mingle events (as opposed to processing 'live' events) you may be interested in caching the results of each feed page request. To do this, simply wrap your Mingle access instance, likely an instance of MingleBasicAuthAccess, with MingleFeedCache. For now, this cache is a simple disk cache of all requests to the event feed that specify a page parameter, i.e., not the 'most recent events' page. In the future, it might make sense to also cache requests for versioned card data.
+
+Note: This cache does not address the issue of "correction events":http://www.thoughtworks-studios.com/mingle/3.3.1/help/mingle_api_events.html#feed_correction_events. If you detect a correction event, you must decide how to handle this event. Should you choose to clear the cache, you can invoke the clear method on your MingleFeedCache instance.
+
 h2. Retry & Error handling
 
 As of now, retry is not implemented. If an error occurs during event processing, the error will be logged and processing will stop. The next run will re-start at the point of the last error.

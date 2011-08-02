@@ -5,7 +5,6 @@ module MingleEvents
     def initialize(source, cache_dir)
       @source = source
       @cache_dir = cache_dir
-      FileUtils.mkdir_p(@cache_dir)
     end
     
     
@@ -22,6 +21,10 @@ module MingleEvents
     
     def cached?(path)
       File.exist?(path_to_cache_filename(path))
+    end
+    
+    def clear
+      FileUtils.rm_rf(@cache_dir)
     end
       
     private
