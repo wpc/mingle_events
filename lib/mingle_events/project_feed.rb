@@ -35,19 +35,17 @@ module MingleEvents
       end
     
       def each
+        # only process unseen entries on the last seen page ...
+        current_page = @page_containing_last_event
         last_entry_seen = @last_entry_id.nil?
-        @page_containing_last_event.entries.reverse.each do |e|
+        current_page.entries.reverse.each do |e|
           yield e if last_entry_seen
-          if e.entry_id == @last_entry_id
-            last_entry_seen = true
-          end
+          last_entry_seen = true if e.entry_id == @last_entry_id
         end
-        
-        @current_page = @page_containing_last_event.previous
-        @page_containing_last_event = nil
-        while (@current_page)
-          @current_page.entries.reverse.each{|e| yield e}
-          @current_page = @current_page.previous
+            
+        # ... and then take everything else
+        while (current_page = current_page.previous)
+          current_page.entries.reverse.each{|e| yield e}
         end
       end
     
