@@ -1,13 +1,14 @@
 module MingleEvents
   module Processors
     
-    # Posts each event in stream to the specified URL
-    #--
-    # TODO: figure out what to do with basic/digest auth and HTTPS.  are they separate processors?
-    class HttpPostPublisher < AbstractNoRetryProcessor
+    class HttpPostPublisher
 
       def initialize(url)
         @url = url
+      end
+      
+      def process_events(events)
+        events.map{|e| process_event(e)}
       end
 
       def process_event(event) 

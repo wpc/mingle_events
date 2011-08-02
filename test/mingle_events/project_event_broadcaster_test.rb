@@ -3,138 +3,130 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'test_helper'))
 module MingleEvents
   class ProjectEventBroadcasterTest < Test::Unit::TestCase
     
-    def test_can_broadcast_all_events_from_beginning_of_time_passing_all_symbol
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file, :all)
+    def test_can_process_all_events_from_beginning_of_time_on_initialization
+      processor = DummyProcessor.new
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
+      state_file = temp_file
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file, :from_beginning_of_time)
       event_broadcaster.run_once
       
-      assert_equal(30, processor.processed_events.count)
+      assert_equal(7, processor.processed_events.count)
+      assert_equal '103', YAML.load(File.new(state_file))[:last_entry].split('/').last
     end
     
-    def test_can_broadcast_all_events_from_beginning_of_time_passing_nil
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file, nil)
+    def test_can_initialize_for_all_future_events
+      processor = DummyProcessor.new
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
+      state_file = temp_file
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file, :from_now)
       event_broadcaster.run_once
       
-      assert_equal(30, processor.processed_events.count)
+      assert_equal(0, processor.processed_events.count)
+      assert_equal '103', YAML.load(File.new(state_file))[:last_entry].split('/').last
     end
     
     def test_can_process_only_recent_history
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
-      event_broadcaster.run_once
-      
-      assert_equal(25, processor.processed_events.count)
-      assert_equal('http://example.com/entry/6', processor.processed_events.first.entry_id)
-      assert_equal('http://example.com/entry/30', processor.processed_events.last.entry_id)
-    end
-    
-    def test_initializes_new_project_even_when_no_new_events
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new(0)
+      processor = DummyProcessor.new
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
       state_file = temp_file
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)
-      event_broadcaster.run_once
-      
-      feed = DummyFeed.new
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)
-      event_broadcaster.run_once
-      
-      # we would only get beyond a page of events if previously initialized
-      assert_equal(30, processor.processed_events.count)
-    end
-    
-    def test_publishses_all_events_beyond_last_event_for_initialized_project
-      state_file = temp_file
-      File.open(state_file, 'w') do |io|
-        YAML.dump({:last_event_id => 'http://example.com/entry/28'}, io)
+      File.open(state_file, 'w') do |out|
+        YAML.dump({
+          :last_entry => 'https://mingle.example.com/projects/atlas/events/index/100',
+          :last_page => 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3'}, out)
       end
-      
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file)    
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file, :from_now)
       event_broadcaster.run_once
       
-      assert_equal(
-        ['http://example.com/entry/29', 'http://example.com/entry/30'], 
-        processor.processed_events.map(&:entry_id)
-      )
+      assert_equal(2, processor.processed_events.count)
+      assert_equal '103', YAML.load(File.new(state_file))[:last_entry].split('/').last
     end
     
-    def test_does_nothing_when_no_new_events
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new(5)
+    def test_initializes_successfully_when_project_has_no_events_and_initializing_from_beginning_of_time
+      feed = DummyNoEventProjectFeed.new
       state_file = temp_file
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [], state_file, :from_beginning_of_time)
       event_broadcaster.run_once
-      assert_equal(5, processor.processed_events.count)
+     
+      state = YAML.load(File.new(state_file))
+      assert_nil state[:last_entry]
+      assert_nil state[:last_page]
+    end
+    
+    def test_initializes_successfully_when_project_has_no_events_and_initializing_from_now
+      feed = DummyNoEventProjectFeed.new
+      state_file = temp_file
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [], state_file, :from_now)
+      event_broadcaster.run_once
+     
+      state = YAML.load(File.new(state_file))
+      assert_nil state[:last_entry]
+      assert_nil state[:last_page]
+    end
+        
+    def test_does_nothing_when_no_new_events
+      processor = DummyProcessor.new
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
+      state_file = temp_file
+      File.open(state_file, 'w') do |out|
+        YAML.dump({
+          :last_entry => 'https://mingle.example.com/projects/atlas/events/index/103',
+          :last_page => 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3'}, out)
+      end
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], state_file, :from_now)
+      event_broadcaster.run_once
       
-      processor = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new(0)
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor], temp_file)
       assert_equal(0, processor.processed_events.count)
+      assert_equal '103', YAML.load(File.new(state_file))[:last_entry].split('/').last
     end
     
     def test_publishes_to_all_subscribers
-      processor_1 = DummyAbstractNoRetryProcessor.new
-      processor_2 = DummyAbstractNoRetryProcessor.new
-      feed = DummyFeed.new(2)
-      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor_1, processor_2], temp_file)
+      processor_1 = DummyProcessor.new
+      processor_2 = DummyProcessor.new
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
+      state_file = temp_file
+      File.open(state_file, 'w') do |out|
+        YAML.dump({
+          :last_entry => 'https://mingle.example.com/projects/atlas/events/index/100',
+          :last_page => 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3'}, out)
+      end
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor_1, processor_2], state_file, :from_now)
       event_broadcaster.run_once
       
       assert_equal(2, processor_1.processed_events.count)
       assert_equal(2, processor_2.processed_events.count)
     end
     
-    #--
-    # TODO: validate that this test is even remotely legit. i'm not feeling good
-    # about this failure scenario :(
-    def test_failure_during_process_events_does_not_block_other_processors_from_processing_events
-      good_processor_1 = DummyAbstractNoRetryProcessor.new
-      exploding_processor = DummyAbstractNoRetryProcessor.new
-      def exploding_processor.process_events(events)
-        events.each do |event|
-          process_event(event)
-        end
-        events
+    def test_failure_during_processing_stops_processing
+      processor_1 = DummyProcessor.new
+      processor_2 = DummyProcessor.new
+      def processor_1.process_event(event)
+        raise "Explode!" if event.entry_id == 'https://mingle.example.com/projects/atlas/events/index/103'
+        super
       end
-      def exploding_processor.process_event(event)
-        if event.entry_id == 'http://example.com/entry/29'
-          raise "Blowing up on 29!"
-        else
-          super(event)
-        end
+      feed = ProjectFeed.new('atlas', stub_mingle_access)
+      state_file = temp_file
+      File.open(state_file, 'w') do |out|
+        YAML.dump({
+          :last_entry => 'https://mingle.example.com/projects/atlas/events/index/100',
+          :last_page => 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3'}, out)
       end
-      good_processor_2 = DummyAbstractNoRetryProcessor.new
-      
-      feed = DummyFeed.new(3)
-      log_stream = StringIO.new
-      event_broadcaster = ProjectEventBroadcaster.new(
-        feed, [good_processor_1, exploding_processor, good_processor_2], 
-        temp_file, 25, Logger.new(log_stream))
+      event_broadcaster = ProjectEventBroadcaster.new(feed, [processor_1, processor_2], state_file, :from_now, DummyLogger.new)
       event_broadcaster.run_once
       
-      assert(log_stream.string.index('Unable to complete event processing'))
-      assert_equal(
-        ['http://example.com/entry/28', 'http://example.com/entry/29', 'http://example.com/entry/30'], 
-        good_processor_1.processed_events.map(&:entry_id))      
-      assert_equal(
-        ['http://example.com/entry/28'], 
-        exploding_processor.processed_events.map(&:entry_id))      
-      assert_equal(
-        ['http://example.com/entry/28', 'http://example.com/entry/29', 'http://example.com/entry/30'], 
-        good_processor_2.processed_events.map(&:entry_id))      
+      assert_equal(1, processor_1.processed_events.count)
+      assert_equal '101', YAML.load(File.new(state_file))[:last_entry].split('/').last    
     end
         
-    class DummyAbstractNoRetryProcessor < MingleEvents::Processors::AbstractNoRetryProcessor
+    class DummyProcessor
       
       attr_reader :processed_events
       
       def initialize
         @processed_events = []
+      end
+      
+      def process_events(events)
+        events.each{|e| process_event(e)}
       end
       
       def process_event(event)
@@ -143,30 +135,20 @@ module MingleEvents
       
     end
     
-    class DummyFeed
-      
-      LAST_ENTRY = 30
-      
-      def initialize(entry_count = LAST_ENTRY)
-        @entry_count = entry_count
-        @fixed_time_point = Time.parse('2011-02-03T01:00:52Z')
+    class DummyNoEventProjectFeed
+      def most_recent_entry
+        nil
       end
       
-      def entries
-        (LAST_ENTRY.downto(LAST_ENTRY - @entry_count + 1)).map do |i| 
-          OpenStruct.new(
-            :entry_id => "http://example.com/entry/#{i}",
-            :updated => @fixed_time_point - i
-          )
-        end
+      def entries_beyond(last_entry, last_page)
+        []
       end
-      
     end
     
-    class DummyDeadLetterOffice
-      attr_reader :unprocessed_events
-      def deliver(error, *events)
-        events.each{|e| (@unprocessed_events ||= []) << e}
+    class DummyLogger
+      
+      def error(message)
+        
       end
     end
      

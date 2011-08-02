@@ -4,9 +4,12 @@ module MingleEvents
   # representing an event in Mingle.
   class Entry
     
+    attr_reader :page_url
+    
     # Construct with the wrapped Nokogiri Elem for the entry
-    def initialize(entry_element)
+    def initialize(entry_element, page_url)
       @entry_element = entry_element
+      @page_url = page_url
     end
     
     # The raw entry XML from the Atom feed
@@ -66,6 +69,10 @@ module MingleEvents
     def card_version_resource_uri
       raise "You cannot get card version data for an event that is not sourced by a card!" unless card?      
       @card_version_resource_uri ||= parse_card_version_resource_uri
+    end
+    
+    def to_s
+      "Entry[entry_id=#{entry_id}, updated=#{updated}]"
     end
     
     private

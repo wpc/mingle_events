@@ -49,9 +49,23 @@ class Test::Unit::TestCase
       <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3" rel="previous"/>
       
       <entry>
+        <id>https://mingle.example.com/projects/atlas/events/index/99</id>
+        <title>entry 99</title>
+        <updated>2011-02-03T01:30:52Z</updated>
+        <author><name>Harry</name></author>
+      </entry>
+      
+      <entry>
+        <id>https://mingle.example.com/projects/atlas/events/index/98</id>
+        <title>entry 98</title>
+        <updated>2011-02-03T01:20:52Z</updated>
+        <author><name>Harry</name></author>
+      </entry>
+      
+      <entry>
         <id>https://mingle.example.com/projects/atlas/events/index/97</id>
         <title>entry 97</title>
-        <updated>2011-02-03T01:00:52Z</updated>
+        <updated>2011-02-03T01:10:52Z</updated>
         <author><name>Harry</name></author>
       </entry>
     </feed>
@@ -85,7 +99,10 @@ class Test::Unit::TestCase
       
         # feed uses path only for first page, relying upon mingle access to convert
         # to absolute URI -- might need to revisit this 'design' :)
-        '/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT
+        '/api/v2/projects/atlas/feeds/events.xml' => LATEST_PAGE_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml?page=2' => PAGE_2_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml?page=1' => PAGE_1_CONTENT,
+        '/api/v2/projects/atlas/feeds/events.xml?page=3' => LATEST_PAGE_CONTENT,
       }[url]
     end
     stub

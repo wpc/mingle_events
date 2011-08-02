@@ -1,99 +1,91 @@
+require 'ostruct'
+
 module MingleEvents
     
-  # For a given project, polls for previously unseen events and broadcasts these events
-  # to a list of processors, all interested in the project's events.
-  #--
-  # TODO: Need a better name for this class  
+  # For a given project, polls for previously unseen entrys and broadcasts these entrys
+  # to a list of processors, all interested in the project's entrys.
   class ProjectEventBroadcaster
-        
-    def initialize(mingle_feed, event_processors, state_file, initial_event_count = 25, logger = Logger.new(STDOUT))
+            
+    # legal strategies for init_strategy are :from_now and :from_beginning_of_time
+    def initialize(mingle_feed, entry_processors, state_file, init_strategy = :from_now, logger = Logger.new(STDOUT))
       @mingle_feed = mingle_feed
-      @event_processors = event_processors
+      @entry_processors = entry_processors
       @state_file = state_file
-      @initial_event_count = initial_event_count
+      @init_strategy = init_strategy
       @logger = logger
     end  
 
     # Perform the polling for new events and subsequent broadasting to interested processors
     def run_once
       if !initialized?
-        process_initial_events
-        ensure_state_initialized
-      else
-        process_latest_events
+        write_initial_state
       end
+
+      process_latest_events
     end
 
     private
     
-    def process_initial_events
-      initial_entries = if initial_read_is_from_beginning_of_time?
-        @mingle_feed.entries.to_a
-      else
-        @mingle_feed.entries.take(@initial_event_count)
-      end
-      process_events(initial_entries.reverse)
-    end
-    
     def process_latest_events
-      unseen_entries = []
-      @mingle_feed.entries.each do |entry|
-        break if entry.entry_id == last_event_id
-        unseen_entries << entry
-      end
-      process_events(unseen_entries.reverse) 
-    end
-        
-    def process_events(events)
-      @event_processors.each do |processor| 
-        begin
-          processor.process_events(events)
-        rescue StandardError => e
-          @logger.info(%{
-Unable to complete event processing for processor #{processor}. 
-There will be no re-try for one or more of the events below.
-Also, some of the events below may have actually been processed.
-In order to have a more accurate understanding of which events
-were processed and which were not processed you will need to add
-more precise error handling to your processor. If you are writing
-a publisher/notifier (and not a filter) you should consider writing
-a subclass of AbstractNoRetryProcessor in order to narrow the scope
-of processing failure to single events.
-Root Cause: #{e}
-Trace: #{e.backtrace.join("\n")}
-Events: #{events}
-          })
+      @mingle_feed.entries_beyond(last_entry, last_page).each do |entry|
+        @entry_processors.each do |processor|
+          begin
+            processor.process_events([entry])
+            update_state(entry)
+          rescue StandardError => e
+            log_processing_error(e, entry, processor)
+            return
+          end
         end
       end
-      
-      # TODO: write unit test for not writing state when events is empty (and correlate with the init scenario)
-      write_last_event_seen(events.last) unless events.empty?  
     end
     
-    def initial_read_is_from_beginning_of_time?
-      @initial_event_count.nil? || @initial_event_count == :all
+    def log_processing_error(error, entry, processor)
+      @logger.error(%{
+
+Unable to complete entry processing for event #{entry} with processor #{processor}! 
+All event processing will stop. The next run will begin processing at this same event.
+
+Root Cause: #{error}
+Trace: #{error.backtrace.join("\n")}
+entry: #{entry}
+      })
+    end
+            
+    def write_initial_state
+      if @init_strategy == :from_now
+        update_state(@mingle_feed.most_recent_entry || event_zero_state)
+      else
+        update_state(event_zero_state)
+      end
     end
     
-    def last_event_id
-      read_state[:last_event_id]
+    def event_zero_state
+      OpenStruct.new(:last_entry => nil, :last_page => nil)
+    end
+    
+    def last_entry
+      read_state[:last_entry]
+    end
+    
+    def last_page
+      read_state[:last_page]
     end
     
     def initialized?
       File.exist?(@state_file)
     end
-    
-    def ensure_state_initialized
-      write_last_event_seen(nil) unless initialized?
-    end
-    
+        
     def read_state
       @state ||= YAML.load(File.new(@state_file))
     end
 
-    def write_last_event_seen(last_event)
+    def update_state(last_entry)      
       FileUtils.mkdir_p(File.dirname(@state_file))
       File.open(@state_file, 'w') do |out|
-        YAML.dump({:last_event_id => last_event.nil? ? nil : last_event.entry_id}, out)
+        YAML.dump({
+          :last_entry => last_entry.entry_id,
+          :last_page => last_entry.page_url}, out)
       end
     end
 

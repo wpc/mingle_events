@@ -17,7 +17,7 @@ module MingleEvents
       latest_entries_page = Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', stub_mingle_access)
       next_page = latest_entries_page.next
       assert_equal('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2', next_page.url)
-      assert_equal(['https://mingle.example.com/projects/atlas/events/index/97'], next_page.entries.map(&:entry_id))
+      assert_equal('https://mingle.example.com/projects/atlas/events/index/99', next_page.entries.first.entry_id)
     end
     
     def test_next_page_when_on_last_page
@@ -29,7 +29,7 @@ module MingleEvents
       current_page = Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1', stub_mingle_access)
       previous_page = current_page.previous
       assert_equal('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2', previous_page.url)
-      assert_equal(['https://mingle.example.com/projects/atlas/events/index/97'], previous_page.entries.map(&:entry_id))
+      assert_equal('https://mingle.example.com/projects/atlas/events/index/99', previous_page.entries.first.entry_id)
     end
     
     def test_previous_page_when_on_latest_entries

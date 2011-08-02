@@ -17,7 +17,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       # assert_equal(element_xml_text.inspect, entry.raw_xml.inspect) 
       assert_equal("https://mingle.example.com/projects/mingle/events/index/234443", entry.entry_id)
       assert_equal("Page Special:HeaderActions changed", entry.title)
@@ -33,7 +33,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
         
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       assert_equal(
         [Category.new('foo', 'http://tws.com/ns#mingle'), Category.new('bar', 'http://tws.com/ns#go')],
         entry.categories
@@ -55,7 +55,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       assert_equal(106, entry.card_number)
       assert_equal(7, entry.version)
     end
@@ -67,7 +67,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       
       begin
         entry.card_number
@@ -100,7 +100,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       assert_equal('https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7', entry.card_version_resource_uri)
     end
     
@@ -111,7 +111,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       begin
         entry.card_version_resource_uri
         fail("Should not have been able to retrieve a card version resource URI for non card-related event!")
@@ -127,7 +127,7 @@ module MingleEvents
         </entry>}
       element = Nokogiri::XML(element_xml_text)
       
-      entry = Entry.new(element)
+      entry = Entry.new(element, nil)
       assert_equal('https://mingle.example.com/projects/mingle/events/index/234443', entry.event_id)
       assert_equal(entry.entry_id, entry.event_id)
     end

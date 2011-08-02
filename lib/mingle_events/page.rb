@@ -14,7 +14,7 @@ module MingleEvents
   
     def entries
       @entries ||= page_as_document.search('feed/entry').map do |entry_element|
-        Entry.new(entry_element)
+        Entry.new(entry_element, @url)
       end
     end
   

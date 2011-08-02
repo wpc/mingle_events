@@ -1,39 +1,53 @@
 module MingleEvents
   
-  # Simple means of iterating over a project's events, hiding the mechanics
-  # of pagination.
+  # Simple means of iterating over a project's events, hiding the mechanics of pagination.
   class ProjectFeed
-    
+        
     def initialize(project_identifier, mingle_access)
       @mingle_access = mingle_access
       @project_identifier = project_identifier
     end
-  
-    # All entries/events for a project, starting with the most recent. Be careful
-    # not to take all events for a project with significant history without considering
-    # the time this will require.
-    def entries
-      AllEntries.new(Page.new(latest_events_path, @mingle_access))
+    
+    def most_recent_entry
+      Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access).entries.first
     end
-  
+    
+    # pass nil to start at beginning of time... need better signature here
+    def entries_beyond(last_entry, last_page)  
+      page = if last_entry.nil?
+        Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml?page=1", @mingle_access)
+      else
+        Page.new(last_page, @mingle_access)
+      end
+      
+      AllEntriesBeyond.new(last_entry, page)
+    end
+    
     private 
-  
-    def latest_events_path
-      "/api/v2/projects/#{@project_identifier}/feeds/events.xml"
-    end
-  
-    class AllEntries
+        
+    class AllEntriesBeyond
     
       include Enumerable
     
-      def initialize(first_page)
-        @current_page = first_page
+      def initialize(last_entry_id, page_containing_last_event)
+        @last_entry_id = last_entry_id
+        @page_containing_last_event = page_containing_last_event
       end
     
       def each
-        while (@current_page) 
-          @current_page.entries.each{|e| yield e}
-          @current_page = @current_page.next
+        last_entry_seen = @last_entry_id.nil?
+        @page_containing_last_event.entries.reverse.each do |e|
+          yield e if last_entry_seen
+          if e.entry_id == @last_entry_id
+            last_entry_seen = true
+          end
+        end
+        
+        @current_page = @page_containing_last_event.previous
+        @page_containing_last_event = nil
+        while (@current_page)
+          @current_page.entries.reverse.each{|e| yield e}
+          @current_page = @current_page.previous
         end
       end
     
