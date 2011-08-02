@@ -1,5 +1,9 @@
 h2. Urgent
 
+* Document caching
+* Document :from_now v. :from_beginning_of_time
+* Restore optimizations (bulk data loading & bulk event processing) when simply getting latest events
+
 h2. High
 
 * Simplify some of the test XML now that entry parsing is lazy
@@ -10,19 +14,14 @@ h2. High
 ** Property value filter
 ** Card number filter 
 ** Http POST publisher w/ basic and digest auth support
+** Jabber publisher
 
 * Enhance CardData with more data beyond card type
 
 * Proper logging
 
+* Make it easier to manage gem publication
+
 h2. Medium
 
-* Implement schedule polling. Currently there is only a 'run_once' and polling at regular intervals can only be accomplished via cron and similar.
-
-* Need processors:
-** Email publisher
-** Jabber publisher
-
-* What about Retry?  Do something a bit more 'real' with dead letter office.
-
-* When a filter (or anything that is not a subclass of AbstractNoRetryProcessor) blows up, I'm not convinced the correct error handling is in place.
+* More robust error handling; provide options
