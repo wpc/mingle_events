@@ -14,7 +14,7 @@ module MingleEvents
   
     def entries
       @entries ||= page_as_document.search('feed/entry').map do |entry_element|
-        Entry.new(entry_element, @url)
+        Entry.new(entry_element)
       end
     end
   
@@ -33,6 +33,18 @@ module MingleEvents
         nil
       else
         Page.new(previous_url_element.attribute('href').text, @mingle_access)
+      end
+    end
+    
+    def archived?
+      URI.parse(url).query && url == page_as_document.at("feed/link[@rel='self']").attribute('href').text
+    end
+    
+    def closest_archived_page
+      if archived? 
+        self
+      else
+        self.next
       end
     end
   

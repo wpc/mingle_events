@@ -3,13 +3,10 @@ module MingleEvents
   # A Ruby wrapper around an Atom entry, particularly an Atom entry
   # representing an event in Mingle.
   class Entry
-    
-    attr_reader :page_url
-    
+        
     # Construct with the wrapped Nokogiri Elem for the entry
-    def initialize(entry_element, page_url)
+    def initialize(entry_element)
       @entry_element = entry_element
-      @page_url = page_url
     end
     
     # The raw entry XML from the Atom feed

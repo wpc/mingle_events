@@ -4,6 +4,7 @@ h2. Urgent
 
 * Document :from_now v. :from_beginning_of_time
 * Restore optimizations (bulk data loading & bulk event processing) when simply getting latest events
+* Should MingleFeedCache utilize the new ability of Page to determine if it's archived?
 
 h2. High
 

@@ -10,12 +10,14 @@ module MingleEvents
     
     def fetch_page(path)
       if do_not_cache(path)
+        # puts "Fetching #{path} from mingle..."
         return @source.fetch_page(path)
       end
       
       cache_path = path_to_cache_filename(path)
       fetch_and_cache(path, cache_path) unless File.exist?(cache_path)
       
+      # puts "Fetching #{path} from cache..."
       File.open(cache_path).readlines.join("\n")
     end
     
@@ -38,6 +40,7 @@ module MingleEvents
     def fetch_and_cache(path, cache_path)
       FileUtils.mkdir_p(File.dirname(cache_path))
       File.open(cache_path, "w") do |f|
+        # puts "Fetching #{path} from mingle..."
         f << @source.fetch_page(path)
       end
     rescue

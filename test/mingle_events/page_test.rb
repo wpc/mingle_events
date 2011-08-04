@@ -36,6 +36,43 @@ module MingleEvents
       latest_entries_page = Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', stub_mingle_access)
       assert_nil(latest_entries_page.previous)
     end
+    
+    def test_can_determine_whether_archived
+      assert !Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', stub_mingle_access).archived?
+      assert !Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3', stub_mingle_access).archived?
+      assert Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1', stub_mingle_access).archived?
+    end
+    
+    def test_can_determine_closest_archived_page
+      assert_equal 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2',
+        Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', stub_mingle_access).closest_archived_page.url
+      assert_equal 'https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2',
+        Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2', stub_mingle_access).closest_archived_page.url      
+    end
+    
+    def test_can_determine_when_there_is_no_closest_archived_page
+      mingle_access = StubMingleAccess.new
+      mingle_access.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1',
+        %{
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+  <link href="https://mingle.example.com/api/v2/projects/event_tester/feeds/events.xml" rel="current"/>
+  <link href="https://mingle.example.com/api/v2/projects/event_tester/feeds/events.xml" rel="self"/>
+  <entry>
+    <id>https://mingle.example.com/projects/event_tester/events/index/390</id>
+    <title>Card #2 Card Two created</title>
+    <updated>2011-08-02T22:27:38Z</updated>
+    <author><name>David</name></author>
+  </entry>
+  <entry>
+    <id>https://mingle.example.com/projects/event_tester/events/index/389</id>
+    <title>Card #1 Card One created</title>
+    <updated>2011-08-02T22:27:36Z</updated>
+    <author><name>David</name></author>
+  </entry>
+</feed>          
+        })
+      assert_nil Page.new('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1', mingle_access).closest_archived_page
+    end
   
   end
 end
