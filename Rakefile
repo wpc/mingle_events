@@ -60,8 +60,8 @@ end
 
 task :poll_local_mingle do
   
-  state_folder = '/Users/djrice/.mingle-events/local7070/event_tester/event_state' 
-  cache_folder = '/Users/djrice/.mingle-events/local7070/event_tester/mingle_cache'
+  state_folder = '/Users/djrice/.mingle-events/local7070/blank_project/event_state' 
+  cache_folder = '/Users/djrice/.mingle-events/local7070/blank_project/mingle_cache'
   
   FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true'
   FileUtils.rm_rf(cache_folder) if ENV['CLEAN'] == 'true'
@@ -73,7 +73,7 @@ task :poll_local_mingle do
   )
   mingle_access_cache = MingleEvents::MingleFeedCache.new(mingle_access, cache_folder)
     
-  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'event_tester')
+  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'blank_project')
       
   pipeline = MingleEvents::Processors::Pipeline.new([
       # card_data,
@@ -82,10 +82,10 @@ task :poll_local_mingle do
     ])
     
   processors_by_project = {
-    'event_tester' => [pipeline]
+    'blank_project' => [pipeline]
   }
     
-  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder, true).run_once  
+  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder).run_once  
 end
 
 task :poll_mingle do
