@@ -22,27 +22,19 @@ end
 #   p.development_dependencies = []
 # end
 
+def rmdir_on_clean(dir)
+  FileUtils.rm_rf(File.expand_path(dir)) if ENV['CLEAN'] == 'true'
+end
+
 task :clean do
   FileUtils.rm_rf('test/tmp')
 end
 
-task :poll_once_example do
-  
-  state_folder = File.join(File.dirname(__FILE__), 'example_app_state') 
-  cache_folder = File.join(File.dirname(__FILE__), 'example_app_feed_cache') 
-  
-  FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true'
-  FileUtils.rm_rf(cache_folder) if ENV['CLEAN'] == 'true'
-  
-  mingle_access = MingleEvents::MingleBasicAuthAccess.new(
-    'https://mingle.example.com:7071',
-    ENV['MINGLE_USER'],
-    ENV['MINGLE_PASSWORD']
-  )
-  mingle_access_cache = MingleEvents::MingleFeedCache.new(mingle_access, cache_folder)
-    
-  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'test_project')
+task :poll_and_process_once_example do
       
+  mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
+    
+  card_data = MingleEvents::Processors::CardData.new(mingle_access, 'test_project')     
   log_commenting_on_high_priority_stories = MingleEvents::Processors::Pipeline.new([
       card_data,
       MingleEvents::Processors::CardTypeFilter.new(['Story'], card_data),
@@ -50,70 +42,13 @@ task :poll_once_example do
       MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
       MingleEvents::Processors::PutsPublisher.new
     ])
-    
-  processors_by_project = {
-    'test_project' => [log_commenting_on_high_priority_stories]
-  }
-    
-  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder, true).run_once  
+        
+  MingleEvents::Poller.new(mingle_access, {'test_project' => [log_commenting_on_high_priority_stories]}).run_once  
 end
 
-task :poll_local_mingle do
-  
-  state_folder = '/Users/djrice/.mingle-events/local7070/blank_project/event_state' 
-  cache_folder = '/Users/djrice/.mingle-events/local7070/blank_project/mingle_cache'
-  
-  FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true'
-  FileUtils.rm_rf(cache_folder) if ENV['CLEAN'] == 'true'
-  
-  mingle_access = MingleEvents::MingleBasicAuthAccess.new(
-    'https://localhost:7071',
-    'david',
-    'p'
-  )
-  mingle_access_cache = MingleEvents::MingleFeedCache.new(mingle_access, cache_folder)
-    
-  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'blank_project')
-      
-  pipeline = MingleEvents::Processors::Pipeline.new([
-      # card_data,
-      # MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
-      MingleEvents::Processors::PutsPublisher.new
-    ])
-    
-  processors_by_project = {
-    'blank_project' => [pipeline]
-  }
-    
-  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder).run_once  
+task :poll_and_log_example do
+  rmdir_on_clean("~/.mingle-events/localhost")
+  mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
+  MingleEvents::Poller.new(mingle_access, {'blank_project' => [MingleEvents::Processors::PutsPublisher.new]}).run_once  
 end
 
-task :poll_mingle do
-  
-  state_folder = '/Users/djrice/mingle_data/mingle_event_state' 
-  cache_folder = '/Users/djrice/mingle_data/mingle_app_feed_cache'
-  
-  FileUtils.rm_rf(state_folder) if ENV['CLEAN'] == 'true'
-  FileUtils.rm_rf(cache_folder) if ENV['CLEAN'] == 'true'
-  
-  mingle_access = MingleEvents::MingleBasicAuthAccess.new(
-    'https://mingle09.thoughtworks.com',
-    ENV['MINGLE_USER'],
-    ENV['MINGLE_PASSWORD']
-  )
-  mingle_access_cache = MingleEvents::MingleFeedCache.new(mingle_access, cache_folder)
-    
-  card_data = MingleEvents::Processors::CardData.new(mingle_access_cache, 'mingle')
-      
-  pipeline = MingleEvents::Processors::Pipeline.new([
-      card_data,
-      MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
-      MingleEvents::Processors::PutsPublisher.new
-    ])
-    
-  processors_by_project = {
-    'mingle' => [pipeline]
-  }
-    
-  MingleEvents::Poller.new(mingle_access_cache, processors_by_project, state_folder).run_once  
-end

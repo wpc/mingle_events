@@ -5,9 +5,8 @@ module MingleEvents
     # configured for specified mingle projects. processors_by_project_identifier should
     # be a hash where the keys are mingle project identifiers and the values are
     # lists of event processors.
-    def initialize(mingle_access, processors_by_project_identifier, state_folder)
+    def initialize(mingle_access, processors_by_project_identifier)
       @mingle_access = mingle_access
-      @state_folder = state_folder
       @processors_by_project_identifier = processors_by_project_identifier
     end
 
@@ -15,7 +14,7 @@ module MingleEvents
     # broadcast each event to each processor.
     def run_once  
       @processors_by_project_identifier.each do |project_identifier, processors|
-        fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access, File.join(@state_folder, 'fetched_events'))
+        fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access)
         info_file_for_new_event = fetcher.fetch_latest 
         while info_file_for_new_event  
           entry_info = YAML.load(File.new(info_file_for_new_event))

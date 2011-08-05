@@ -4,6 +4,8 @@ module MingleEvents
   # Please only use this class to access resources over HTTPS so
   # as not to send credentials over plain-text connections.
   class MingleBasicAuthAccess
+    
+    attr_reader :base_url
         
     BASIC_AUTH_HTTP_WARNING = %{     
 WARNING!!!

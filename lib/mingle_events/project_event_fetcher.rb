@@ -3,10 +3,11 @@ module MingleEvents
   # fetch all unseen events and write them to disk for future processing
   class ProjectEventFetcher
     
-    def initialize(project_identifier, mingle_access, state_dir)
+    def initialize(project_identifier, mingle_access, state_dir=nil)
       @project_identifier = project_identifier
       @mingle_access = mingle_access
-      @state_dir = state_dir
+      base_uri = URI.parse(mingle_access.base_url)
+      @state_dir = state_dir || File.expand_path(File.join('~', '.mingle-events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
     end
     
     def fetch_latest
@@ -40,11 +41,11 @@ module MingleEvents
       return nil if entry.nil?
       
       entry_id_as_uri = URI.parse(entry.entry_id)
-      relative_path_parts = "#{entry_id_as_uri.host}/#{entry_id_as_uri.path}".split('/')
+      relative_path_parts = entry_id_as_uri.path.split('/')
       entry_id_int = relative_path_parts.last
       insertions = ["#{entry_id_int.to_i/16384}", "#{entry_id_int.to_i%16384}"]
       relative_path_parts = relative_path_parts[0..-2] + insertions + ["#{entry_id_int}.yml"]  
-      File.join(@state_dir, 'events', *relative_path_parts)
+      File.join(@state_dir, *relative_path_parts)
     end
     
     def current_state_file
