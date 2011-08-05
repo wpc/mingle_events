@@ -8,8 +8,8 @@ module MingleEvents
       mingle_access = stub_mingle_access
       processor_1 = DummyProcessor.new
       processor_2 = DummyProcessor.new
-      poller = Poller.new(mingle_access, {'atlas' => [processor_1, processor_2]}, state_folder)
-      poller.run_once
+      poller = Poller.new(mingle_access, {'atlas' => [processor_1, processor_2]})
+      poller.run_once(:clean => true)
       
       expected_entry_ids = [
         'https://mingle.example.com/projects/atlas/events/index/23',

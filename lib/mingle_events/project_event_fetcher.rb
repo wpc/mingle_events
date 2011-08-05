@@ -7,11 +7,15 @@ module MingleEvents
       @project_identifier = project_identifier
       @mingle_access = mingle_access
       base_uri = URI.parse(mingle_access.base_url)
-      @state_dir = state_dir || File.expand_path(File.join('~', '.mingle-events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
+      @state_dir = File.expand_path(state_dir || File.join('~', '.mingle-events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
+    end
+    
+    def reset
+      FileUtils.rm_rf(@state_dir)
     end
     
     def fetch_latest
-      page = Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
+      page = Feed::Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
       most_recent_new_entry = page.entries.first
       
       last_fetched_entry = load_last_fetched_entry
@@ -62,7 +66,7 @@ module MingleEvents
       end
       last_fetched_entry = if current_state[:last_fetched_entry_info_file]
         last_fetched_entry_info = YAML.load(File.new(current_state[:last_fetched_entry_info_file]))
-        Entry.new(Nokogiri::XML(last_fetched_entry_info[:entry_xml]).at('/entry'))
+        Feed::Entry.new(Nokogiri::XML(last_fetched_entry_info[:entry_xml]).at('/entry'))
       else 
         nil
       end

@@ -88,7 +88,7 @@ module MingleEvents
         :entry_xml => last_fetched_entry_xml,
         :next_entry_file_path => nil
       }
-      @last_fetched_entry_info_file = fetcher.file_for_entry(Entry.new(Nokogiri::XML(last_fetched_entry_xml).at('/entry')))
+      @last_fetched_entry_info_file = fetcher.file_for_entry(Feed::Entry.new(Nokogiri::XML(last_fetched_entry_xml).at('/entry')))
       FileUtils.mkdir_p(File.dirname(@last_fetched_entry_info_file))
       File.open(@last_fetched_entry_info_file, 'w') do |out|
         YAML.dump(last_fetched_entry_info, out)
@@ -107,7 +107,7 @@ module MingleEvents
       expected_entry_ids.each_with_index do |expected_entry_id, index|
         file_for_last_inspected_entry = file_for_new_entry
         new_entry_info = YAML.load(File.new(file_for_new_entry))
-        new_entry = Entry.new(Nokogiri::XML(new_entry_info[:entry_xml]).at('/entry'))
+        new_entry = Feed::Entry.new(Nokogiri::XML(new_entry_info[:entry_xml]).at('/entry'))
         assert_equal(expected_entry_id, new_entry.entry_id)
         file_for_new_entry = new_entry_info[:next_entry_file_path]
       end

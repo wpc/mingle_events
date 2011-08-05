@@ -12,13 +12,14 @@ module MingleEvents
 
     # Run a single poll for each project configured with processor(s) and 
     # broadcast each event to each processor.
-    def run_once  
+    def run_once(options={})
       @processors_by_project_identifier.each do |project_identifier, processors|
         fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access)
+        fetcher.reset if options[:clean]
         info_file_for_new_event = fetcher.fetch_latest 
         while info_file_for_new_event  
           entry_info = YAML.load(File.new(info_file_for_new_event))
-          entry = Entry.new(Nokogiri::XML(entry_info[:entry_xml]).at('/entry'))
+          entry = Feed::Entry.new(Nokogiri::XML(entry_info[:entry_xml]).at('/entry'))
           processors.each{|p| p.process_events([entry])}
           info_file_for_new_event = entry_info[:next_entry_file_path]
         end
