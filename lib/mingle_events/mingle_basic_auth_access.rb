@@ -24,6 +24,7 @@ WARNING!!
     
     # Fetch the content at location via HTTP. Throws error if non-200 response.
     def fetch_page(location) 
+      MingleEvents.log.info("About to fetch #{location}...")
       rsp = fetch_page_response(location)    
       case rsp
       when Net::HTTPSuccess

@@ -8,6 +8,8 @@ require 'active_support'
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib', 'mingle_events'))
 
+MingleEvents.log.level = Logger::WARN
+
 class Test::Unit::TestCase 
   
   # page 3

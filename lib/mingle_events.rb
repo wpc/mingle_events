@@ -15,3 +15,12 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'min
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'processors'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'project_custom_properties'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'project_event_fetcher'))
+
+module MingleEvents
+  
+  attr_accessor :log
+  module_function :log, :log=
+  self.log = Logger.new(STDOUT)
+  self.log.level = Logger::INFO
+
+end

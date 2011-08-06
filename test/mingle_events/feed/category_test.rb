@@ -5,7 +5,7 @@ module MingleEvents
     
     class CategoryTest < Test::Unit::TestCase
     
-      def test_equality
+      def test_equality        
         assert_equal(Category::CARD, Category::CARD)
         assert_equal(Category::CARD, Category.new('card', 'http://www.thoughtworks-studios.com/ns/mingle#categories'))
         assert_not_equal(Category::CARD, Category::PAGE)

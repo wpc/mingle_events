@@ -1,6 +1,5 @@
 require 'rake'
 require 'rake/testtask'
-# require 'echoe'
 
 require 'lib/mingle_events'
 
@@ -10,18 +9,9 @@ desc "Run tests"
 Rake::TestTask.new do |task|
   task.pattern = 'test/**/*_test.rb'
   task.verbose = true
-  task.warning = true
+  task.warning = true  
 end
  
-# Echoe.new('mingle-events', '0.0.1') do |p|
-#   p.description    = "A gem that lets you process Mingle events in a pipes and filters style."
-#   p.url            = "https://github.com/ThoughtWorksStudios/mingle-events"
-#   p.author         = "David Rice"
-#   p.email          = "david.rice at gmail dot com"
-#   p.ignore_pattern = ["test/**/*.rb", "high_level_design.graffle", "stories.textile", "Rakefile"]
-#   p.development_dependencies = []
-# end
-
 def rmdir_on_clean(dir)
   FileUtils.rm_rf(File.expand_path(dir)) if ENV['CLEAN'] == 'true'
 end
