@@ -7,7 +7,7 @@ module MingleEvents
       @project_identifier = project_identifier
       @mingle_access = mingle_access
       base_uri = URI.parse(mingle_access.base_url)
-      @state_dir = File.expand_path(state_dir || File.join('~', '.mingle-events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
+      @state_dir = File.expand_path(state_dir || File.join('~', '.mingle_events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
     end
     
     def reset

@@ -22,7 +22,7 @@ end
 
 task :readme_example do
   
-  rmdir_on_clean("~/.mingle-events/localhost")
+  rmdir_on_clean("~/.mingle_events/localhost")
   
   # configure access to mingle
   mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
@@ -38,7 +38,7 @@ task :readme_example do
 end
 
 task :poll_and_log_example do
-  rmdir_on_clean("~/.mingle-events/localhost")
+  rmdir_on_clean("~/.mingle_events/localhost")
   mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
   MingleEvents::Poller.new(mingle_access, {'blank_project' => [MingleEvents::Processors::PutsPublisher.new]}).run_once  
 end

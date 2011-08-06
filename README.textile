@@ -9,15 +9,15 @@ However, we do accept that asking integrators wishing to consume events to imple
 h3. Installation
 
 <pre>
-gem install mingle-events
+gem install mingle_events
 </pre>
 
 h3. Source
 
-"Hosted on github":https://github.com/ThoughtWorksStudios/mingle-events
+"Hosted on github":https://github.com/ThoughtWorksStudios/mingle_events
 
 <pre>
-git clone git://github.com/ThoughtWorksStudios/mingle-events.git
+git clone git://github.com/ThoughtWorksStudios/mingle_events.git
 </pre>
   
 h2. Quick example
