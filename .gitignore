@@ -4,4 +4,6 @@ tmp
 .rvmrc
 *.tmproj
 *_data
+Gemfile.lock
+*.gem
 pkg

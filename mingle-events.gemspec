@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ["LICENSE.txt", "README.textile"]
   s.files = FileList[
     "Gemfile", 
-    "Gemfile.lock",
     "lib/**/*.rb",
     "LICENSE.txt",
     "README.textile",
