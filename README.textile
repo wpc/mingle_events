@@ -23,29 +23,17 @@ git clone git://github.com/ThoughtWorksStudios/mingle-events.git
 h2. Quick example
 
 <pre>
-# specify mingle access
-mingle_access = MingleEvents::MingleBasicAuthAccess.new(
-  'https://mingle.example.com',
-  ENV['MINGLE_USER'],
-  ENV['MINGLE_PASS']
-)
-  
-# construct event processing pipelines
-post_new_comments = MingleEvents::Processors::Pipeline.new([
-  MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
-  MingleEvents::Processors::HttpPostPublisher.new('http://otherissuetracker.example.com/comments')
+# configure access to mingle
+mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
+
+# assemble processing pipeline
+post_comments_to_another_service = MingleEvents::Processors::Pipeline.new([
+  MingleEvents::Processors::CategoryFilter.new([MingleEvents::Feed::Category::COMMENT_ADDITION]),
+  MingleEvents::Processors::HttpPostPublisher.new('http://localhost:4567/')
 ])
 
-# assign processors to project
-processors_by_project = {
-  'project_one' => [post_new_comments]
-}
-
-# specify where to store event processing state
-state_folder = File.dirname('/where/to/store/last/event/processed')
-
-# run the poller once.  you'll want to schedule this with cron or something similar
-MingleEvents::Poller.new(mingle_access, processors_by_project, state_folder).run_once
+# poll once
+MingleEvents::Poller.new(mingle_access, {'test_project' => [post_comments_to_another_service]}).run_once  
 </pre>
 
 h2. High level design
@@ -73,24 +61,22 @@ This library ships the following processors:
 
 h2. Card Data
 
-CardData is a special processor in that it implements a second interface, beyond event processing. This interface is one that allows the lookup of data for the card that sourced the event (if the event was actually sourced by a card). As looking up card data requires accessing additional Mingle server resources, you want to take special care that you don't make repeated requests for the same resources. This is most easily accomplished by re-using a single instance of CardData across your entire pipeline. To start, place an instance of CardData at the start of your pipeline, so that it looks up data for all cards possibly related to the pipeline. Then supply that card data to any processors needing the card data, such as CardTypeFilter. 
+CardData is a special processor in that it implements a second interface, beyond event processing. This interface is one that allows the lookup of data for the card that sourced the event (if the event was actually sourced by a card). As looking up card data requires accessing additional Mingle server resources, you want to take special care that you don't make repeated requests for the same resources. If you have multiple processors requiring CardData, be sure to use a single instance of CardData across your entire pipeline.
 
 <pre>
 card_data = MingleEvents::Processors::CardData.new(mingle_access, 'test_project')
     
-post_commenting_on_bugs_and_stories = MingleEvents::Processors::Pipeline.new([
-    card_data,
-    MingleEvents::Processors::CardTypeFilter.new(['story', 'bug'], card_data),
-    MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
-    MingleEvents::Processors::HttpPostPublisher.new('http://otherissuetracker.example.com/comments')
+post_commenting_on_high_priority_bugs_and_stories = MingleEvents::Processors::Pipeline.new([
+   MingleEvents::Processors::CardTypeFilter.new(['story', 'bug'], card_data),
+   MingleEvents::Processors::CustomPropertyFilter.new('Priority', 'High', card_data),
+   MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
+   MingleEvents::Processors::HttpPostPublisher.new('http://otherissuetracker.example.com/comments')
 ])
 </pre>
 
-CardData attempts to optimize the number of resources which must be retrieved from Mingle. For the most part, if you are processing events at frequent intervals, CardData can perform its data lookup with a single call to the execute_mql API. If a card has between event sourcing and event processing, CardData will lookup the specific version resource. All resource fetching is lazy, i.e., resources are only retrieved as they are needed. 
+Note that CardData will provide data for the version of the card that was created by the event you are processing and *not* the current version of the card.  
 
-NOTE: For now, the above bulk loading of data in CardData is effectively turned of. This is because I needed to change some internals of event broadcasting such that processing a big project's entire history did not cause OOM issues. I will very soon restore the bulk loading optimization for when the poller is simply reading the last handful of events. The API has not changed... you just might see your client making a few more calls to Mingle.)
-
-CardData will provide data for the version of the card that was created by the event you are processing and *not* the current version of the card. 
+(For users familiar with earlier versions of this library, you will notice that the bulk loading of card data is currently not being taken advantage of. This is because I needed to change some internals of event broadcasting such that processing a big project's entire history did not cause OOM issues. I will very soon restore the bulk loading optimization for when the poller is simply reading the last handful of events. CardData still works, you just might see your client making a few more calls to Mingle.)
 
 h2. Writing your own processor
 
@@ -123,6 +109,8 @@ end
 Be absolutely sure that any processor you write returns a list of events. If you fail to do this, any pipeline using this processor will not function correctly. 
 
 Each event that is passed to the processor is an instance of type MingleEvents::Entry which is a Ruby wrapper around an Atom event. The Entry class makes it easy to access information such as author, Atom categories, whether the event was sourced by a card, etc. As the model is not yet complete, the Entry class also exposes the raw XML of the entry.
+
+(If you are wondering why the interface for processing is for a list of events rather than a single event, it is because of the above mentioned bulk loading of card data. This may change in the future. CardData may get its own special interface to perform a pre-processing bulk load, and the event processing interface will move to a single event at a time.)
 
 h2. Retry & Error handling
 

@@ -20,20 +20,21 @@ task :clean do
   FileUtils.rm_rf('test/tmp')
 end
 
-task :poll_and_process_once_example do
-      
+task :readme_example do
+  
+  rmdir_on_clean("~/.mingle-events/localhost")
+  
+  # configure access to mingle
   mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
     
-  card_data = MingleEvents::Processors::CardData.new(mingle_access, 'test_project')     
-  log_commenting_on_high_priority_stories = MingleEvents::Processors::Pipeline.new([
-      card_data,
-      MingleEvents::Processors::CardTypeFilter.new(['Story'], card_data),
-      MingleEvents::Processors::CustomPropertyFilter.new('Priority', 'High', card_data),
-      MingleEvents::Processors::CategoryFilter.new([MingleEvents::Category::COMMENT_ADDITION]),
-      MingleEvents::Processors::PutsPublisher.new
-    ])
+  # assemble processing pipeline
+  post_comments_to_another_service = MingleEvents::Processors::Pipeline.new([
+    MingleEvents::Processors::CategoryFilter.new([MingleEvents::Feed::Category::COMMENT_ADDITION]),
+    MingleEvents::Processors::HttpPostPublisher.new('http://localhost:4567/')
+  ])
         
-  MingleEvents::Poller.new(mingle_access, {'test_project' => [log_commenting_on_high_priority_stories]}).run_once  
+  # poll once
+  MingleEvents::Poller.new(mingle_access, {'test_project' => [post_comments_to_another_service]}).run_once  
 end
 
 task :poll_and_log_example do
