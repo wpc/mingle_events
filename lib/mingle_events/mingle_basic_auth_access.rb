@@ -24,7 +24,6 @@ WARNING!!
     
     # Fetch the content at location via HTTP. Throws error if non-200 response.
     def fetch_page(location) 
-      MingleEvents.log.info("About to fetch #{location}...")
       rsp = fetch_page_response(location)    
       case rsp
       when Net::HTTPSuccess
@@ -51,18 +50,18 @@ See <http://www.thoughtworks-studios.com/mingle/3.3/help/configuring_mingle_auth
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       else
-        puts BASIC_AUTH_HTTP_WARNING
+        MingleEvents.log.warn BASIC_AUTH_HTTP_WARNING
       end
 
       path = uri.path
       path += "?#{uri.query}" if uri.query
-      puts "Fetching page at #{path}..."
+      MingleEvents.log.info "Fetching page at #{path}..."
       
       start = Time.now
       req = Net::HTTP::Get.new(path)
       req.basic_auth(@username, @password)
       rsp = http.request(req)
-      puts "...#{Time.now - start}"
+      MingleEvents.log.info "...#{path} fetched in #{Time.now - start} seconds."
 
       rsp
     end
