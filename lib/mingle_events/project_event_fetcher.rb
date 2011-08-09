@@ -17,15 +17,14 @@ module MingleEvents
     def fetch_latest
       page = Feed::Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
       most_recent_new_entry = page.entries.first
-      
       last_fetched_entry = load_last_fetched_entry
-      fetched_previously_seen_event = false      
+      last_fetched_entry_seen = false      
       next_entry = nil
-      while !fetched_previously_seen_event && page
+      while !last_fetched_entry_seen && page
         page.entries.each do |entry|
                     
           if last_fetched_entry && entry.entry_id == last_fetched_entry.entry_id
-            fetched_previously_seen_event = true
+            last_fetched_entry_seen = true
             break
           end
           
@@ -36,11 +35,42 @@ module MingleEvents
         page = page.next
       end
             
-      update_current_state(most_recent_new_entry)
+      # at the end of looping through all new entries, next_entry, which we've been
+      # tracking in order to wire-up the chain, now is also the first entry that
+      # the client/user will want to process
       
+      update_current_state(next_entry, most_recent_new_entry)
       file_for_entry(next_entry)
+    end   
+    
+    def first_entry_fetched_file
+      load_current_state[:first_fetched_entry_info_file]
     end
     
+    def last_entry_fetched_file
+      load_current_state[:last_fetched_entry_info_file]
+    end
+    
+    def update_current_state(oldest_new_entry, most_recent_new_entry)
+      current_state = load_current_state
+      if most_recent_new_entry
+        current_state.merge!(:last_fetched_entry_info_file => file_for_entry(most_recent_new_entry))
+        if current_state[:first_fetched_entry_info_file].nil?
+          current_state.merge!(:first_fetched_entry_info_file => file_for_entry(oldest_new_entry))
+        end
+        File.open(current_state_file, 'w'){|out| YAML.dump(current_state, out)}
+      end
+    end 
+    
+    def write_entry_to_disk(entry, next_entry)
+      file = file_for_entry(entry)
+      FileUtils.mkdir_p(File.dirname(file))
+      file_content = {:entry_xml => entry.raw_xml, :next_entry_file_path => file_for_entry(next_entry)}
+      File.open(file, 'w'){|out| YAML.dump(file_content, out)}
+    end
+           
+    private
+
     def file_for_entry(entry)
       return nil if entry.nil?
       
@@ -55,15 +85,9 @@ module MingleEvents
     def current_state_file
       File.expand_path(File.join(@state_dir, 'current_state.yml'))
     end
-        
-    private 
     
     def load_last_fetched_entry
-      current_state = if File.exist?(current_state_file)
-        YAML.load(File.new(current_state_file))
-      else
-        {:last_fetched_entry_info_file => nil}
-      end
+      current_state = load_current_state
       last_fetched_entry = if current_state[:last_fetched_entry_info_file]
         last_fetched_entry_info = YAML.load(File.new(current_state[:last_fetched_entry_info_file]))
         Feed::Entry.new(Nokogiri::XML(last_fetched_entry_info[:entry_xml]).at('/entry'))
@@ -71,26 +95,14 @@ module MingleEvents
         nil
       end
     end
-    
-    def update_current_state(most_recent_new_entry)
-      if most_recent_new_entry
-        File.open(current_state_file, 'w') do |out|
-          YAML.dump({:last_fetched_entry_info_file => file_for_entry(most_recent_new_entry)}, out)
-        end
-      end
-    end
         
-    def write_entry_to_disk(entry, next_entry)
-      file = file_for_entry(entry)
-      FileUtils.mkdir_p(File.dirname(file))
-      file_content = {
-        :entry_xml => entry.raw_xml,
-        :next_entry_file_path => file_for_entry(next_entry)
-      }
-      File.open(file, 'w') do |out|
-        YAML.dump(file_content, out)
+    def load_current_state
+      if File.exist?(current_state_file)
+        YAML.load(File.new(current_state_file))
+      else
+        {:last_fetched_entry_info_file => nil, :first_fetched_entry_info_file => nil}
       end
     end
-    
+          
   end
 end
