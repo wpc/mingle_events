@@ -72,6 +72,20 @@ module MingleEvents
       def to_s
         "Entry[entry_id=#{entry_id}, updated=#{updated}]"
       end
+      
+      def eql?(object)
+        if object.equal?(self)
+         return true
+        elsif !self.class.equal?(object.class)
+         return false
+        end
+      
+        return object.entry_id == entry_id
+      end
+      
+      def ==(object)
+        eql?(object)
+      end
   
       private
   

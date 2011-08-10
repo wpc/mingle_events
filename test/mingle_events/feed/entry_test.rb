@@ -134,6 +134,34 @@ module MingleEvents
         assert_equal(entry.entry_id, entry.event_id)
       end
       
+      def test_entry_id_determines_equality
+        element_xml_text_1 = %{
+          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+            <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
+            <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+          </entry>}
+        entry_1 = Entry.new(Nokogiri::XML(element_xml_text_1))
+        
+        element_xml_text_2 = %{
+          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+            <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
+            <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+          </entry>}
+        entry_2 = Entry.new(Nokogiri::XML(element_xml_text_2))
+        
+        element_xml_text_3 = %{
+          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+            <id>https://mingle.example.com/projects/mingle/events/index/234</id>
+            <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+          </entry>}
+        entry_3 = Entry.new(Nokogiri::XML(element_xml_text_3))
+        
+        assert entry_1.eql?(entry_2)
+        assert entry_1 == entry_2
+        assert !entry_2.eql?(entry_3)
+        assert entry_2 != entry_3
+      end
+      
     end
   
   end

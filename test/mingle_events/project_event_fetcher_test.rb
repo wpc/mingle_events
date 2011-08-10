@@ -7,10 +7,11 @@ module MingleEvents
       state_dir = temp_dir
       fetcher = ProjectEventFetcher.new('atlas', stub_mingle_access, state_dir)  
       
-      file_for_first_new_entry = fetcher.fetch_latest
-      assert_expected_entry_chain_written_to_disk([23, 97, 98, 99, 100, 101, 103], file_for_first_new_entry, fetcher)         
-      assert_equal 23, entry_id_for_file(fetcher.first_entry_fetched_file)
-      assert_equal 103, entry_id_for_file(fetcher.last_entry_fetched_file)
+      latest_entries = fetcher.fetch_latest
+      expected_latest_entries = [23, 97, 98, 99, 100, 101, 103].map{|n| entry(n)}
+      assert_equal(expected_latest_entries, latest_entries.to_a)
+      assert_equal entry(23), fetcher.first_entry_fetched
+      assert_equal entry(103), fetcher.last_entry_fetched
     end
     
     def test_can_fetch_all_entries_and_write_to_disk_when_existing_state
@@ -19,10 +20,11 @@ module MingleEvents
       
       setup_current_state(23, 97, 97, fetcher)
       
-      file_for_first_new_entry = fetcher.fetch_latest
-      assert_expected_entry_chain_written_to_disk([98, 99, 100, 101, 103], file_for_first_new_entry, fetcher)      
-      assert_equal 23, entry_id_for_file(fetcher.first_entry_fetched_file)
-      assert_equal 103, entry_id_for_file(fetcher.last_entry_fetched_file)
+      latest_entries = fetcher.fetch_latest
+      expected_latest_entries = [98, 99, 100, 101, 103].map{|n| entry(n)}
+      assert_equal(expected_latest_entries, latest_entries.to_a)
+      assert_equal entry(23), fetcher.first_entry_fetched
+      assert_equal entry(103), fetcher.last_entry_fetched
     end
     
     def test_no_new_entries_with_current_state
@@ -30,9 +32,9 @@ module MingleEvents
       fetcher = ProjectEventFetcher.new('atlas', stub_mingle_access, state_dir)
       setup_current_state(23, 97, 103, fetcher)
 
-      assert_nil fetcher.fetch_latest
-      assert_equal 23, entry_id_for_file(fetcher.first_entry_fetched_file)
-      assert_equal 103, entry_id_for_file(fetcher.last_entry_fetched_file)
+      assert fetcher.fetch_latest.to_a.empty?
+      assert_equal entry(23), fetcher.first_entry_fetched
+      assert_equal entry(103), fetcher.last_entry_fetched
     end
     
     def test_no_new_entries_with_no_current_state
@@ -49,8 +51,9 @@ module MingleEvents
 </feed>})
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
       
-      assert_nil fetcher.fetch_latest
-      assert !File.exist?(File.join(state_dir, 'current_state.yml'))
+      assert fetcher.fetch_latest.to_a.empty?
+      assert_nil fetcher.first_entry_fetched
+      assert_nil fetcher.last_entry_fetched
     end
     
     private
@@ -63,31 +66,9 @@ module MingleEvents
       fetcher.write_entry_to_disk(last_entry, nil)  
       fetcher.update_current_state(first_entry, last_entry)
     end
-    
-    def assert_expected_entry_chain_written_to_disk(expected_entries, file_for_first_new_entry, fetcher)
-   
-      file_for_new_entry = file_for_first_new_entry
-      file_for_last_inspected_entry = nil
-      expected_entries.each_with_index do |expected_entry_id, index|
-        file_for_last_inspected_entry = file_for_new_entry
-        new_entry_info = YAML.load(File.new(file_for_new_entry))
-        new_entry = Feed::Entry.new(Nokogiri::XML(new_entry_info[:entry_xml]).at('/entry'))
-        assert_equal(expected_entry_id, new_entry.entry_id.split('/').last.to_i)
-        file_for_new_entry = new_entry_info[:next_entry_file_path]
-      end
-    end
-    
-    def entry_id_for_file(filename)
-      entry = Feed::Entry.new(Nokogiri::XML(YAML.load(File.new(filename))[:entry_xml]).at('/entry'))
-      entry.entry_id.split('/').last.to_i
-    end
-    
+            
     def entry(entry_id)
-      Feed::Entry.new(Nokogiri::XML(entry_xml(entry_id)).at('/entry'))
-    end
-    
-    def entry_xml(entry_id)
-      %{
+      entry_xml = %{
         <entry>
           <id>https://mingle.example.com/projects/atlas/events/index/#{entry_id}</id>
           <title>entry #{entry_id}</title>
@@ -95,7 +76,7 @@ module MingleEvents
           <author><name>Bob</name></author>
         </entry>
       }
+      Feed::Entry.new(Nokogiri::XML(entry_xml).at('/entry'))
     end
-      
   end
 end

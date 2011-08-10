@@ -34,23 +34,20 @@ module MingleEvents
         end
         page = page.next
       end
-            
-      # at the end of looping through all new entries, next_entry, which we've been
-      # tracking in order to wire-up the chain, now is also the first entry that
-      # the client/user will want to process
-      
+                  
       update_current_state(next_entry, most_recent_new_entry)
-      file_for_entry(next_entry)
+      Entries.new(file_for_entry(next_entry), file_for_entry(most_recent_new_entry))
     end   
     
-    def first_entry_fetched_file
-      load_current_state[:first_fetched_entry_info_file]
+    def first_entry_fetched
+      current_state_entry(:first_fetched_entry_info_file)
     end
     
-    def last_entry_fetched_file
-      load_current_state[:last_fetched_entry_info_file]
+    def last_entry_fetched
+      current_state_entry(:last_fetched_entry_info_file)
     end
     
+    # only public to facilitate testing
     def update_current_state(oldest_new_entry, most_recent_new_entry)
       current_state = load_current_state
       if most_recent_new_entry
@@ -62,6 +59,7 @@ module MingleEvents
       end
     end 
     
+    # only public to facilitate testing
     def write_entry_to_disk(entry, next_entry)
       file = file_for_entry(entry)
       FileUtils.mkdir_p(File.dirname(file))
@@ -70,6 +68,14 @@ module MingleEvents
     end
            
     private
+    
+    def current_state_entry(info_file_key)
+      if info_file = load_current_state[info_file_key]
+        entry_for_xml(YAML.load(File.new(info_file))[:entry_xml])
+      else
+        nil
+      end
+    end
 
     def file_for_entry(entry)
       return nil if entry.nil?
@@ -102,6 +108,35 @@ module MingleEvents
       else
         {:last_fetched_entry_info_file => nil, :first_fetched_entry_info_file => nil}
       end
+    end
+    
+    def entry_for_xml(entry_xml)
+      Feed::Entry.new(Nokogiri::XML(entry_xml).at('/entry'))
+    end
+    
+    class Entries
+      
+      include Enumerable
+      
+      def initialize(first_info_file, last_info_file)
+        @first_info_file = first_info_file
+        @last_info_file = last_info_file
+      end
+      
+      def entry_for_xml(entry_xml)
+        Feed::Entry.new(Nokogiri::XML(entry_xml).at('/entry'))
+      end
+      
+      def each(&block)
+        current_file = @first_info_file
+        while current_file
+          current_entry_info = YAML.load(File.new(current_file))
+          yield(entry_for_xml(current_entry_info[:entry_xml]))
+          break if File.expand_path(current_file) == File.expand_path(@last_info_file)
+          current_file = current_entry_info[:next_entry_file_path]
+        end
+      end
+      
     end
           
   end

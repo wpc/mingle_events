@@ -17,13 +17,9 @@ module MingleEvents
       @processors_by_project_identifier.each do |project_identifier, processors|
         fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access)
         fetcher.reset if options[:clean]
-        info_file_for_new_event = fetcher.fetch_latest 
-        while info_file_for_new_event  
-          entry_info = YAML.load(File.new(info_file_for_new_event))
-          entry = Feed::Entry.new(Nokogiri::XML(entry_info[:entry_xml]).at('/entry'))
+        fetcher.fetch_latest.each do |entry|
           MingleEvents.log.info("About to process event #{entry.entry_id}...")
           processors.each{|p| p.process_events([entry])}
-          info_file_for_new_event = entry_info[:next_entry_file_path]
         end
       end
     end
