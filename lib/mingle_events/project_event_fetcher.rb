@@ -10,10 +10,13 @@ module MingleEvents
       @state_dir = File.expand_path(state_dir || File.join('~', '.mingle_events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
     end
     
+    # blow away any existing state, when next used to fetch events from mingle
+    # will crawl all the way back to time zero
     def reset
       FileUtils.rm_rf(@state_dir)
     end
     
+    # fetch the latest events from mingle, i.e., the ones not previously seen
     def fetch_latest
       page = Feed::Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
       most_recent_new_entry = page.entries.first
@@ -39,6 +42,8 @@ module MingleEvents
       Entries.new(file_for_entry(next_entry), file_for_entry(most_recent_new_entry))
     end
     
+    # returns all previously fetched entries; can be used to reprocess the events for, say,
+    # various historical analyses
     def all_fetched_entries
       current_state = load_current_state
       Entries.new(current_state[:first_fetched_entry_info_file], current_state[:last_fetched_entry_info_file])
