@@ -37,7 +37,12 @@ module MingleEvents
                   
       update_current_state(next_entry, most_recent_new_entry)
       Entries.new(file_for_entry(next_entry), file_for_entry(most_recent_new_entry))
-    end   
+    end
+    
+    def all_fetched_entries
+      current_state = load_current_state
+      Entries.new(current_state[:first_fetched_entry_info_file], current_state[:last_fetched_entry_info_file])
+    end 
     
     def first_entry_fetched
       current_state_entry(:first_fetched_entry_info_file)

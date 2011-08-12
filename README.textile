@@ -115,3 +115,20 @@ Each event that is passed to the processor is an instance of type MingleEvents::
 h2. Retry & Error handling
 
 As of now, retry is not implemented. If an error occurs during event processing, the error will be logged and processing will stop. The next run will re-start at the point of the last error.
+
+h2. Historical analysis
+
+One of the great usages of event playback is historical analysis. E.g., if you wanted to see the number of stories added each day to your project, you could write a processor that counts new stories and takes a snapshot at the end of each day, where the end of the day is the first time you see an event for the next day. If you are doing this sort of analysis you will not want to poll the entire project's event history every time as that is quite time consuming. 
+
+It is possible to repeatedly run analysis against previously fetched events using the ProjectEventFetcher class that is only used in the internals of the standard polling mechanism.  ProjectEventFetcher does most of the real work of reading new events from the server and making them available for local processing, so it's not a bad class to get to know.
+
+<pre>
+event_fetcher = MingleEvents::ProjectEventFetcher.new('mingle', mingle_access)
+processor = MingleEvents::Processors::PutsPublisher.new
+event_fetcher.all_fetched_entries.each do |e|
+  processor.process_events([e])
+end  
+</pre>
+
+That's not an ideal interface.  It's a bit awkward to push a single event into an array for processing.  We'll likely look to make this much better as we bring back batch processing of events.
+
