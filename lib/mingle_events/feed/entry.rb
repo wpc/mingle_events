@@ -43,6 +43,16 @@ module MingleEvents
           Category.new(category_element.attribute('term').text, category_element.attribute('scheme').text)
         end
       end
+      
+      # The array of changes for this entry. Each change is a hash with redundant :type and
+      # :category entries specifying the category to which the change maps. Additional hash entries
+      # are keyed according to change element names specified at 
+      # http://www.thoughtworks-studios.com/mingle/3.3/help/mingle_api_events.html
+      # Change detail is contained in nested hashes, again with keys specified by element
+      # names in the the above sepcified Mingle help documetion
+      def changes
+        @changes ||= Changes.new(@entry_element.at('content').at('changes', 'xmlns' => 'http://www.thoughtworks-studios.com/ns/mingle'))
+      end
   
       # Whether the entry/event was sourced by a Mingle card
       def card?

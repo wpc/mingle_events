@@ -13,6 +13,10 @@ module MingleEvents
         assert_not_equal(Category::CARD, Object.new)
         assert_equal(:foo, {Category::CARD => :foo}[Category.new('card', 'http://www.thoughtworks-studios.com/ns/mingle#categories')])
       end
+      
+      def test_can_lookup_by_mingle_term
+        assert_equal(Category::CARD_CREATION, Category.for_mingle_term('card-creation'))
+      end
     
     end
   

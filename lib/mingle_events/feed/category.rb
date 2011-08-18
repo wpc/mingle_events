@@ -6,6 +6,8 @@ module MingleEvents
     # All current Mingle categories are also defined here, as constants.
     class Category
     
+      @@categories_by_mingle_term = {}
+    
       # The category's term
       attr_reader :term
       # The category's scheme
@@ -14,6 +16,16 @@ module MingleEvents
       def initialize(term, scheme)
         @term = term
         @scheme = scheme
+        @@categories_by_mingle_term[term] = self
+      end
+      
+      # lookup a category by the text value of the term (mingle scheme is assumed)
+      def self.for_mingle_term(mingle_term)
+        @@categories_by_mingle_term[mingle_term]
+      end
+      
+      def to_s
+        term
       end
     
       def ==(other)
@@ -30,7 +42,7 @@ module MingleEvents
     
       # The Atom category scheme for all Mingle categories
       MINGLE_SCHEME = 'http://www.thoughtworks-studios.com/ns/mingle#categories'
-    
+          
       # Category for any event sourced by a card
       CARD = Category.new('card', MINGLE_SCHEME)
       # Category for any event that is the creation of a new card
