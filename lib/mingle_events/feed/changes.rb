@@ -10,13 +10,11 @@ module MingleEvents
       
       include Enumerable
       
-      BUILDERS = {
-        Category::CARD_CREATION => ChangeBuilders::NoDetailChange.new(Category::CARD_CREATION),
-        Category::CARD_DELETION => ChangeBuilders::NoDetailChange.new(Category::CARD_DELETION),
+      CUSTOM_BUILDERS = {
         Category::CARD_TYPE_CHANGE => ChangeBuilders::CardTypeChange.new,
-        Category::NAME_CHANGE => ChangeBuilders::NameChange.new
+        Category::NAME_CHANGE => ChangeBuilders::NameChange.new,
       }
-      
+            
       def initialize(changes_element)
         @changes_element = changes_element
       end
@@ -31,7 +29,8 @@ module MingleEvents
         changes = []
         @changes_element.xpath("mingle:change").map do |change_element|
           category = Category.for_mingle_term(change_element["type"])
-          changes <<  BUILDERS[category].build(change_element)
+          builder = CUSTOM_BUILDERS[category] || ChangeBuilders::NoDetailChange.new(category)
+          changes <<  builder.build(change_element)
         end
         changes
       end
