@@ -14,45 +14,24 @@ module MingleEvents
       end
   
       def entries
-        @entries ||= page_as_document.search('feed/entry').map do |entry_element|
+        @entries ||= page_as_document.search('entry').map do |entry_element|
           Entry.new(entry_element)
         end
       end
   
       def next
-        next_url_element = page_as_document.at("feed/link[@rel='next']")
+        next_url_element = page_as_document.at("link[@rel='next']")
         if next_url_element.nil?
           nil
         else
-          Page.new(next_url_element.attribute('href').text, @mingle_access)
-        end
-      end
-    
-      def previous
-        previous_url_element = page_as_document.at("feed/link[@rel='previous']")
-        if previous_url_element.nil?
-          nil
-        else
-          Page.new(previous_url_element.attribute('href').text, @mingle_access)
-        end
-      end
-    
-      def archived?
-        URI.parse(url).query && url == page_as_document.at("feed/link[@rel='self']").attribute('href').text
-      end
-    
-      def closest_archived_page
-        if archived? 
-          self
-        else
-          self.next
+          Page.new(next_url_element["href"], @mingle_access)
         end
       end
   
       private    
   
       def page_as_document
-        @page_as_document ||= Nokogiri::XML(@mingle_access.fetch_page(@url))
+        @page_as_document ||= Nokogiri::XML(@mingle_access.fetch_page(@url)).remove_namespaces!
       end
     
     end

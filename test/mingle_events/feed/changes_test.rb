@@ -7,9 +7,9 @@ module MingleEvents
       
       def test_parse_multiple_changes
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="card-creation"/>
                 <change type="card-type-change">
                   <old_value nil="true"></old_value>
@@ -26,8 +26,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         # check that all the changes are built
         assert_equal 3, entry.changes.count        
@@ -42,9 +41,9 @@ module MingleEvents
             
       def test_parse_name_change_from_nil
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="name-change">
                   <old_value nil="true" />
                   <new_value>Basic email integration</new_value>
@@ -52,8 +51,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::NAME_CHANGE, change[:type])
@@ -64,9 +62,9 @@ module MingleEvents
       
       def test_parse_name_change
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="name-change">
                   <old_value>Work with email</old_value>
                   <new_value>Basic email integration</new_value>
@@ -74,8 +72,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::NAME_CHANGE, change[:type])
@@ -86,15 +83,14 @@ module MingleEvents
       
       def test_parse_type_info_when_no_custom_builder_specified
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="card-creation"/>
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         assert_equal(Category::CARD_CREATION, entry.changes.first[:type])
         assert_equal(Category::CARD_CREATION, entry.changes.first[:category])
@@ -102,9 +98,9 @@ module MingleEvents
       
       def test_parse_card_type_change_from_nil
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="card-type-change">
                   <old_value nil="true"></old_value>
                   <new_value>
@@ -116,8 +112,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::CARD_TYPE_CHANGE, change[:type])
@@ -129,9 +124,9 @@ module MingleEvents
       
       def test_parse_card_type_change
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <content type="application/vnd.mingle+xml">
-              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+              <changes>
                 <change type="card-type-change">
                   <old_value>
                     <card_type url="https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml">
@@ -147,8 +142,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::CARD_TYPE_CHANGE, change[:type])
@@ -158,6 +152,38 @@ module MingleEvents
         assert_equal("Defect", change[:new_value][:name])
         assert_equal("https://mingle.example.com/api/v2/projects/atlas/card_types/27.xml", change[:new_value][:url])
       end
+      
+      def test_parse_card_type_change_to_deleted_type
+        element_xml_text = %{
+          <entry>
+            <content type="application/vnd.mingle+xml">
+              <changes>
+                <change type="card-type-change">
+                  <old_value>
+                    <card_type url="https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml">
+                      <name>Story</name>
+                    </card_type>
+                  </old_value>
+                  <new_value>
+                    <deleted_card_type>
+                      <name>Card</name>
+                    </deleted_card_type>
+                  </new_value>
+                </change>
+              </changes>
+            </content>
+          </entry>}
+        entry = Entry.from_xml_snippet(element_xml_text)
+                
+        change = entry.changes.first
+        assert_equal(Category::CARD_TYPE_CHANGE, change[:type])
+        assert_equal(Category::CARD_TYPE_CHANGE, change[:category])
+        assert_equal("Story", change[:old_value][:name])
+        assert_equal("https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml", change[:old_value][:url])
+        assert_equal("Card", change[:new_value][:name])
+        assert change[:new_value][:deleted?]
+        assert_equal(nil, change[:new_value][:url])
+      end     
       
     end        
   end

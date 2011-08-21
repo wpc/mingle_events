@@ -7,7 +7,7 @@ module MingleEvents
   
       def test_parse_basic_attributes
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <title>Page Special:HeaderActions changed</title>
             <updated>2011-02-03T08:12:42Z</updated>
@@ -16,10 +16,9 @@ module MingleEvents
               <email>sammy@example.com</email>
               <uri>https://mingle.example.com/api/v2/users/233.xml</uri>
             </author>
-          </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
+          </entry>
+        }
+        entry = Entry.from_xml_snippet(element_xml_text)      
         # assert_equal(element_xml_text.inspect, entry.raw_xml.inspect) 
         assert_equal("https://mingle.example.com/projects/mingle/events/index/234443", entry.entry_id)
         assert_equal("Page Special:HeaderActions changed", entry.title)
@@ -29,13 +28,11 @@ module MingleEvents
     
       def test_parse_categories
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <category term="foo" scheme='http://tws.com/ns#mingle' />
             <category term="bar" scheme="http://tws.com/ns#go" />
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-        
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         assert_equal(
           [Category.new('foo', 'http://tws.com/ns#mingle'), Category.new('bar', 'http://tws.com/ns#go')],
           entry.categories
@@ -48,29 +45,25 @@ module MingleEvents
         # that the card number is derived from a single, precise position
       
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
             <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/106.xml" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="application/vnd.mingle+xml" title="bug #107"/>
             <link href="https://mingle.example.com/projects/atlas/cards/108?version=17" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="text/html" title="bug #109 (v7)"/>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         assert_equal(106, entry.card_number)
         assert_equal(7, entry.version)
       end
     
       def test_card_number_and_version_throws_error_when_event_not_related_to_a_card      
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
-      
+        entry = Entry.from_xml_snippet(element_xml_text)
+        
         begin
           entry.card_number
           fail("Should not have been able to retrieve a card number for non card-related event!")
@@ -93,27 +86,23 @@ module MingleEvents
         # that the card number is derived from a single, precise position
       
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
             <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/106.xml" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="application/vnd.mingle+xml" title="bug #107"/>
             <link href="https://mingle.example.com/projects/atlas/cards/108?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="text/html" title="bug #109 (v7)"/>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         assert_equal('https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7', entry.card_version_resource_uri)
       end
     
       def test_card_version_resource_uri_throws_error_when_not_card_event
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         begin
           entry.card_version_resource_uri
           fail("Should not have been able to retrieve a card version resource URI for non card-related event!")
@@ -124,37 +113,35 @@ module MingleEvents
     
       def test_entry_id_aliased_as_event_id
         element_xml_text = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
           </entry>}
-        element = Nokogiri::XML(element_xml_text)
-      
-        entry = Entry.new(element)
+        entry = Entry.from_xml_snippet(element_xml_text)
         assert_equal('https://mingle.example.com/projects/mingle/events/index/234443', entry.event_id)
         assert_equal(entry.entry_id, entry.event_id)
       end
       
       def test_entry_id_determines_equality
         element_xml_text_1 = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_1 = Entry.new(Nokogiri::XML(element_xml_text_1))
+        entry_1 = Entry.from_xml_snippet(element_xml_text_1)
         
         element_xml_text_2 = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_2 = Entry.new(Nokogiri::XML(element_xml_text_2))
+        entry_2 = Entry.from_xml_snippet(element_xml_text_2)
         
         element_xml_text_3 = %{
-          <entry xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+          <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_3 = Entry.new(Nokogiri::XML(element_xml_text_3))
+        entry_3 = Entry.from_xml_snippet(element_xml_text_3)
         
         assert entry_1.eql?(entry_2)
         assert entry_1 == entry_2

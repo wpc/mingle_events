@@ -18,11 +18,18 @@ module MingleEvents
       def initialize(author_element)
         @name = element_text(author_element, 'name')
         @email = element_text(author_element, 'email', true)
-        @uri = element_text(author_element, 'uri', true)
-        @icon_uri = element_text(author_element, 'mingle:icon', true)
+        @uri = element_text(author_element, 'uri', true)        
+        @icon_uri = element_text(author_element, 'icon', true)
+      end
+      
+      def self.from_xml_snippet(entry_xml)
+        self.new(Nokogiri::XML(entry_xml).remove_namespaces!)        
       end
     
     end
-    
+      
   end
 end
+
+
+

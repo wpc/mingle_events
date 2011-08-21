@@ -8,8 +8,8 @@ module MingleEvents
           {
             :category => Category::CARD_TYPE_CHANGE, 
             :type => Category::CARD_TYPE_CHANGE,
-            :old_value => build_card_type(element.at_xpath("mingle:old_value")),
-            :new_value => build_card_type(element.at_xpath("mingle:new_value"))
+            :old_value => build_card_type(element.at("old_value")),
+            :new_value => build_card_type(element.at("new_value"))
           }         
         end
         
@@ -19,10 +19,17 @@ module MingleEvents
           if element["nil"] == "true"
             nil
           else
-            {
-              :url => element.at_xpath("mingle:card_type")["url"],
-              :name => element.at_xpath("mingle:card_type/mingle:name").inner_text
-            }       
+            if element.at("card_type")
+              {
+                :url => element.at("card_type")["url"],
+                :name => element.at("card_type/name").inner_text
+              }
+            else
+              {
+                :deleted? => true,
+                :name => element.at("deleted_card_type/name").inner_text
+              }
+            end
           end          
         end
                   

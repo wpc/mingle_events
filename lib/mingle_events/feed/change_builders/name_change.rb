@@ -8,8 +8,8 @@ module MingleEvents
           {
             :category => Category::NAME_CHANGE, 
             :type => Category::NAME_CHANGE,
-            :old_value => value(element.at_xpath("mingle:old_value")),
-            :new_value => value(element.at_xpath("mingle:new_value"))
+            :old_value => value(element.at("old_value")),
+            :new_value => value(element.at("new_value"))
           }         
         end
         

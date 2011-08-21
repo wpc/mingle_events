@@ -76,7 +76,7 @@ module MingleEvents
           <author><name>Bob</name></author>
         </entry>
       }
-      Feed::Entry.new(Nokogiri::XML(entry_xml).at('/entry'))
+      Feed::Entry.from_xml_snippet(entry_xml)
     end
   end
 end

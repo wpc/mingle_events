@@ -27,7 +27,7 @@ module MingleEvents
       
       def parse_changes
         changes = []
-        @changes_element.xpath("mingle:change").map do |change_element|
+        @changes_element.search("change").map do |change_element|
           category = Category.for_mingle_term(change_element["type"])
           builder = CUSTOM_BUILDERS[category] || ChangeBuilders::NoDetailChange.new(category)
           changes <<  builder.build(change_element)
