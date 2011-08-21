@@ -18,18 +18,10 @@ module MingleEvents
         def build_card_type(element)
           if element["nil"] == "true"
             nil
-          else
-            if element.at("card_type")
-              {
-                :url => element.at("card_type")["url"],
-                :name => element.at("card_type/name").inner_text
-              }
-            else
-              {
-                :deleted? => true,
-                :name => element.at("deleted_card_type/name").inner_text
-              }
-            end
+          elsif element.at("card_type")
+            {:url => element.at("card_type")["url"], :name => element.at("card_type/name").inner_text}
+          else 
+            {:deleted? => true, :name => element.at("deleted_card_type/name").inner_text}
           end          
         end
                   
