@@ -14,7 +14,7 @@ module MingleEvents
             <mingle:icon>https://mingle.example.com/user/icon/233/profile.jpg</mingle:icon>
           </author>
         }        
-        author = Author.from_xml_snippet(author_xml)
+        author = Author.from_snippet(author_xml)
         assert_equal("Sammy Soso", author.name)
         assert_equal("sammy@example.com", author.email)
         assert_equal("https://mingle.example.com/api/v2/users/233.xml", author.uri)
@@ -27,7 +27,7 @@ module MingleEvents
             <name>Sammy Soso</name>
           </author>
         }
-        author = Author.from_xml_snippet(author_xml)
+        author = Author.from_snippet(author_xml)
         assert_equal("Sammy Soso", author.name)
         assert_nil(author.email)
         assert_nil(author.uri)

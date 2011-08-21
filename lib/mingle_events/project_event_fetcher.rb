@@ -81,7 +81,7 @@ module MingleEvents
     
     def current_state_entry(info_file_key)
       if info_file = load_current_state[info_file_key]
-        Feed::Entry.from_xml_snippet(YAML.load(File.new(info_file))[:entry_xml])
+        Feed::Entry.from_snippet(YAML.load(File.new(info_file))[:entry_xml])
       else
         nil
       end
@@ -106,7 +106,7 @@ module MingleEvents
       current_state = load_current_state
       last_fetched_entry = if current_state[:last_fetched_entry_info_file]
         last_fetched_entry_info = YAML.load(File.new(current_state[:last_fetched_entry_info_file]))
-        Feed::Entry.from_xml_snippet(last_fetched_entry_info[:entry_xml])
+        Feed::Entry.from_snippet(last_fetched_entry_info[:entry_xml])
       else 
         nil
       end
@@ -133,7 +133,7 @@ module MingleEvents
         current_file = @first_info_file
         while current_file
           current_entry_info = YAML.load(File.new(current_file))
-          yield(Feed::Entry.from_xml_snippet(current_entry_info[:entry_xml]))
+          yield(Feed::Entry.from_snippet(current_entry_info[:entry_xml]))
           break if File.expand_path(current_file) == File.expand_path(@last_info_file)
           current_file = current_entry_info[:next_entry_file_path]
         end

@@ -18,7 +18,7 @@ module MingleEvents
             </author>
           </entry>
         }
-        entry = Entry.from_xml_snippet(element_xml_text)      
+        entry = Entry.from_snippet(element_xml_text)      
         # assert_equal(element_xml_text.inspect, entry.raw_xml.inspect) 
         assert_equal("https://mingle.example.com/projects/mingle/events/index/234443", entry.entry_id)
         assert_equal("Page Special:HeaderActions changed", entry.title)
@@ -32,7 +32,7 @@ module MingleEvents
             <category term="foo" scheme='http://tws.com/ns#mingle' />
             <category term="bar" scheme="http://tws.com/ns#go" />
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         assert_equal(
           [Category.new('foo', 'http://tws.com/ns#mingle'), Category.new('bar', 'http://tws.com/ns#go')],
           entry.categories
@@ -52,7 +52,7 @@ module MingleEvents
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/106.xml" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="application/vnd.mingle+xml" title="bug #107"/>
             <link href="https://mingle.example.com/projects/atlas/cards/108?version=17" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="text/html" title="bug #109 (v7)"/>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         assert_equal(106, entry.card_number)
         assert_equal(7, entry.version)
       end
@@ -62,7 +62,7 @@ module MingleEvents
           <entry>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         begin
           entry.card_number
@@ -93,7 +93,7 @@ module MingleEvents
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/106.xml" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="application/vnd.mingle+xml" title="bug #107"/>
             <link href="https://mingle.example.com/projects/atlas/cards/108?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="text/html" title="bug #109 (v7)"/>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         assert_equal('https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7', entry.card_version_resource_uri)
       end
     
@@ -102,7 +102,7 @@ module MingleEvents
           <entry>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         begin
           entry.card_version_resource_uri
           fail("Should not have been able to retrieve a card version resource URI for non card-related event!")
@@ -116,7 +116,7 @@ module MingleEvents
           <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         assert_equal('https://mingle.example.com/projects/mingle/events/index/234443', entry.event_id)
         assert_equal(entry.entry_id, entry.event_id)
       end
@@ -127,21 +127,21 @@ module MingleEvents
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_1 = Entry.from_xml_snippet(element_xml_text_1)
+        entry_1 = Entry.from_snippet(element_xml_text_1)
         
         element_xml_text_2 = %{
           <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_2 = Entry.from_xml_snippet(element_xml_text_2)
+        entry_2 = Entry.from_snippet(element_xml_text_2)
         
         element_xml_text_3 = %{
           <entry>
             <id>https://mingle.example.com/projects/mingle/events/index/234</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
-        entry_3 = Entry.from_xml_snippet(element_xml_text_3)
+        entry_3 = Entry.from_snippet(element_xml_text_3)
         
         assert entry_1.eql?(entry_2)
         assert entry_1 == entry_2

@@ -76,7 +76,7 @@ module MingleEvents
           <author><name>Bob</name></author>
         </entry>
       }
-      Feed::Entry.from_xml_snippet(entry_xml)
+      Feed::Entry.from_snippet(entry_xml)
     end
   end
 end

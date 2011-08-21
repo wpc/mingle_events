@@ -26,7 +26,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         # check that all the changes are built
         assert_equal 3, entry.changes.count        
@@ -51,7 +51,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::NAME_CHANGE, change[:type])
@@ -72,7 +72,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::NAME_CHANGE, change[:type])
@@ -90,7 +90,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         assert_equal(Category::CARD_CREATION, entry.changes.first[:type])
         assert_equal(Category::CARD_CREATION, entry.changes.first[:category])
@@ -112,7 +112,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::CARD_TYPE_CHANGE, change[:type])
@@ -142,7 +142,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
         
         change = entry.changes.first
         assert_equal(Category::CARD_TYPE_CHANGE, change[:type])
@@ -173,7 +173,7 @@ module MingleEvents
               </changes>
             </content>
           </entry>}
-        entry = Entry.from_xml_snippet(element_xml_text)
+        entry = Entry.from_snippet(element_xml_text)
                 
         change = entry.changes.first
         assert_equal(Category::CARD_TYPE_CHANGE, change[:type])

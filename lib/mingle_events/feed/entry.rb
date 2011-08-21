@@ -10,8 +10,8 @@ module MingleEvents
         @entry_element = entry_element
       end
       
-      def self.from_xml_snippet(entry_xml)
-        self.new(Nokogiri::XML(entry_xml).remove_namespaces!)        
+      def self.from_snippet(entry_xml)
+        self.new(Nokogiri::XML(entry_xml))        
       end
   
       # The raw entry XML from the Atom feed
