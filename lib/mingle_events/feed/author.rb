@@ -14,10 +14,10 @@ module MingleEvents
       attr_reader :icon_uri
   
       def initialize(author_element)
-        @name = element_inner_text(author_element, 'name')
-        @email = element_inner_text(author_element, 'email', true)
-        @uri = element_inner_text(author_element, 'uri', true)        
-        @icon_uri = element_inner_text(author_element, 'icon', true)
+        @name = author_element.at("name").inner_text
+        @email = optional_element_text(author_element, 'email')
+        @uri = optional_element_text(author_element, 'uri')        
+        @icon_uri = optional_element_text(author_element, 'icon')
       end
       
       def self.from_snippet(entry_xml)
@@ -26,13 +26,9 @@ module MingleEvents
       
       private 
       
-      def element_inner_text(parent_element, element_name, optional = false)
+      def optional_element_text(parent_element, element_name)
         element = parent_element.at(element_name)
-        if optional && element.nil?
-          nil
-        else
-          element.inner_text
-        end
+        element.nil? ? nil : element.inner_text
       end
     
     end
