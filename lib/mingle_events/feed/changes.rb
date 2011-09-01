@@ -1,6 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'change_builders', 'card_type_change')) 
 require File.expand_path(File.join(File.dirname(__FILE__), 'change_builders', 'no_detail_change')) 
 require File.expand_path(File.join(File.dirname(__FILE__), 'change_builders', 'name_change')) 
+require File.expand_path(File.join(File.dirname(__FILE__), 'change_builders', 'property_change')) 
 
 module MingleEvents  
   module Feed
@@ -13,6 +14,7 @@ module MingleEvents
       CUSTOM_BUILDERS = {
         Category::CARD_TYPE_CHANGE => ChangeBuilders::CardTypeChange.new,
         Category::NAME_CHANGE => ChangeBuilders::NameChange.new,
+        Category::PROPERTY_CHANGE => ChangeBuilders::PropertyChange.new
       }
             
       def initialize(changes_element)

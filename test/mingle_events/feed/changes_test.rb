@@ -185,6 +185,91 @@ module MingleEvents
         assert_equal(nil, change[:new_value][:url])
       end     
       
+      def test_parse_card_property_change
+        element_xml_text = %{
+          <entry>
+            <content type="application/vnd.mingle+xml">
+              <changes>
+                <change type="property-change">
+                  <property_definition 
+                      url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">
+                    <name>Priority</name>
+                    <position nil="true"></position>
+                    <data_type>string</data_type>
+                    <is_numeric type="boolean">false</is_numeric>
+                  </property_definition>
+                  <old_value>nice</old_value>
+                  <new_value>must</new_value>
+                </change>
+              </changes>
+            </content>
+          </entry>}
+        entry = Entry.from_snippet(element_xml_text)
+                
+        change = entry.changes.first
+        assert_equal(Category::PROPERTY_CHANGE, change[:type])
+        assert_equal(Category::PROPERTY_CHANGE, change[:category])
+        assert_equal(
+          "http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml", 
+          change[:property_definition][:url]
+        )
+        assert_equal("Priority", change[:property_definition][:name])
+        assert_equal("nice", change[:old_value])
+        assert_equal("must", change[:new_value])
+      end  
+      
+      def test_parse_card_property_change_from_nil
+        element_xml_text = %{
+          <entry>
+            <content type="application/vnd.mingle+xml">
+              <changes>
+                <change type="property-change">
+                  <property_definition 
+                      url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">
+                    <name>Priority</name>
+                    <position nil="true"></position>
+                    <data_type>string</data_type>
+                    <is_numeric type="boolean">false</is_numeric>
+                  </property_definition>
+                  <old_value nil="true"></old_value>
+                  <new_value>must</new_value>
+                </change>
+              </changes>
+            </content>
+          </entry>}
+        entry = Entry.from_snippet(element_xml_text)
+                
+        change = entry.changes.first
+        assert_nil(change[:old_value])
+        assert_equal("must", change[:new_value])
+      end   
+      
+      def test_parse_card_property_change_to_nil
+        element_xml_text = %{
+          <entry>
+            <content type="application/vnd.mingle+xml">
+              <changes>
+                <change type="property-change">
+                  <property_definition 
+                      url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">
+                    <name>Priority</name>
+                    <position nil="true"></position>
+                    <data_type>string</data_type>
+                    <is_numeric type="boolean">false</is_numeric>
+                  </property_definition>
+                  <old_value>nice</old_value>
+                  <new_value nil="true"></new_value>
+                </change>
+              </changes>
+            </content>
+          </entry>}
+        entry = Entry.from_snippet(element_xml_text)
+                
+        change = entry.changes.first
+        assert_equal("nice", change[:old_value])
+        assert_nil(change[:new_value])
+      end   
+      
     end        
   end
 end
