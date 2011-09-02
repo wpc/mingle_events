@@ -11,7 +11,7 @@ module MingleEvents
       end
       
       def self.from_snippet(entry_xml)
-        self.new(Nokogiri::XML(entry_xml))        
+        self.new(Nokogiri::XML(entry_xml).remove_namespaces!)        
       end
   
       # The raw entry XML from the Atom feed
@@ -49,11 +49,11 @@ module MingleEvents
       end
       
       # The array of changes for this entry. Each change is a hash with redundant :type and
-      # :category entries specifying the category to which the change maps. Additional hash entries
-      # are keyed according to change element names specified at 
-      # http://www.thoughtworks-studios.com/mingle/3.3/help/mingle_api_events.html
-      # Change detail is contained in nested hashes, again with keys specified by element
-      # names in the the above sepcified Mingle help documetion
+      # :category entries specifying the category to which the change maps.  
+      # Change detail is contained in nested hashes with keys mapping exactly to the XML
+      # as described in http://www.thoughtworks-studios.com/mingle/3.3/help/mingle_api_events.html. 
+      # The data in the change hashes reflect only what is in the XML as encriching them would 
+      # require potentially many calls to the Mingle server resulting in very slow processing. 
       def changes
         @changes ||= Changes.new(@entry_element.at("content/changes"))
       end

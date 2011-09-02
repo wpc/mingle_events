@@ -268,7 +268,76 @@ module MingleEvents
         change = entry.changes.first
         assert_equal("nice", change[:old_value])
         assert_nil(change[:new_value])
-      end   
+      end  
+      
+      def test_foo
+        foo = %{
+          <entry>
+              <id>https://mingle09.thoughtworks.com/projects/mingle/events/index/1344945</id>
+              <title>story #67 CRUD Project created</title>
+              <updated>2006-11-13T05:45:06Z</updated>
+              <author>
+                <name>Jon Tirsen</name>
+                <email>jtirsen@thoughtworks.com</email>
+                <uri>https://mingle09.thoughtworks.com/api/v2/users/10040.xml</uri>
+              </author>
+              <link href="https://mingle09.thoughtworks.com/api/v2/projects/mingle/cards/67.xml" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="application/vnd.mingle+xml" title="story #67"/>
+              <link href="https://mingle09.thoughtworks.com/projects/mingle/cards/67" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="story #67"/>
+              <link href="https://mingle09.thoughtworks.com/api/v2/projects/mingle/cards/67.xml?version=1" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="story #67 (v1)"/>
+              <link href="https://mingle09.thoughtworks.com/projects/mingle/cards/67?version=1" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="text/html" title="story #67 (v1)"/>
+              <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <category term="card-creation" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <category term="card-type-change" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <category term="description-change" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <category term="name-change" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <category term="property-change" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+              <content type="application/vnd.mingle+xml">
+                <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
+                  <change type="card-creation"/>
+                  <change type="card-type-change">
+                    <old_value nil="true"/>
+                    <new_value>
+                      <card_type url="https://mingle09.thoughtworks.com/api/v2/projects/mingle/card_types/10134.xml">
+                        <name>story</name>
+                      </card_type>
+                    </new_value>
+                  </change>
+                  <change type="description-change">
+                  </change>
+                  <change type="name-change">
+                    <old_value nil="true"/>
+                    <new_value>CRUD Project</new_value>
+                  </change>
+                  <change type="property-change">
+                    <property_definition url="https://mingle09.thoughtworks.com/api/v2/projects/mingle/property_definitions/10380.xml">
+                      <name>release</name>
+                      <position nil="true"/>
+                      <data_type>string</data_type>
+                      <is_numeric type="boolean">false</is_numeric>
+                    </property_definition>
+                    <old_value nil="true"/>
+                    <new_value>0.92</new_value>
+                  </change>
+                  <change type="property-change">
+                    <property_definition url="https://mingle09.thoughtworks.com/api/v2/projects/mingle/property_definitions/10381.xml">
+                      <name>Priority</name>
+                      <position nil="true"/>
+                      <data_type>string</data_type>
+                      <is_numeric type="boolean">false</is_numeric>
+                    </property_definition>
+                    <old_value nil="true"/>
+                    <new_value>Should</new_value>
+                  </change>
+                </changes>
+              </content>
+            </entry>
+        }
+        
+        entry = Entry.from_snippet(foo)
+        entry.changes.each do |c|
+          puts c
+        end
+      end 
       
     end        
   end
