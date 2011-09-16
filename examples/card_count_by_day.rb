@@ -51,4 +51,4 @@ card_counter = CardCountProcessor.new
 event_fetcher = MingleEvents::ProjectEventFetcher.new(project, mingle_access)
 event_fetcher.all_fetched_entries.each{|e| card_counter.process(e)}
 
-puts card_counter.count_by_day.inspect
+puts card_counter.count_by_day.sort_by{|k,v| k}.inspect

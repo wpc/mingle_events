@@ -16,9 +16,19 @@ module MingleEvents
       FileUtils.rm_rf(@state_dir)
     end
     
+    # setup fetcher to only fetch new events, occuring beyond "right now"
+    def reset_to_now
+      reset
+      
+      latest_event = page_with_latest_entries.entries.first
+      return if latest_event.nil?
+      write_entry_to_disk(latest_event, nil)
+      update_current_state(latest_event, latest_event)
+    end
+    
     # fetch the latest events from mingle, i.e., the ones not previously seen
     def fetch_latest
-      page = Feed::Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
+      page = page_with_latest_entries
       most_recent_new_entry = page.entries.first
       last_fetched_entry = load_last_fetched_entry
       last_fetched_entry_seen = false      
@@ -78,6 +88,10 @@ module MingleEvents
     end
            
     private
+    
+    def page_with_latest_entries
+      Feed::Page.new("/api/v2/projects/#{@project_identifier}/feeds/events.xml", @mingle_access)
+    end
     
     def current_state_entry(info_file_key)
       if info_file = load_current_state[info_file_key]
