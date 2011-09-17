@@ -17,10 +17,8 @@ module MingleEvents
       @processors_by_project_identifier.each do |project_identifier, processors|
         fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access)
         fetcher.reset if options[:clean]
-        fetcher.fetch_latest.each do |entry|
-          MingleEvents.log.info("About to process event #{entry.entry_id}...")
-          processors.each{|p| p.process_events([entry])}
-        end
+        latest_events = fetcher.fetch_latest.to_a
+        processors.each{|p| p.process_events(latest_events)}        
       end
     end
     

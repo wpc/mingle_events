@@ -188,6 +188,29 @@ module MingleEvents
         
         assert_nil(card_data.for_card_event(event_1))
       end
+      
+      def test_survives_bulk_load_exploding
+        event = stub_event(4, 103, 13, ['card', 'property-change'])
+    
+        dummy_mingle_access = StubMingleAccess.new
+        dummy_mingle_access.register_explosion(URI.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (103)'))
+
+        dummy_mingle_access.register_page_content('http://example.com?version=13',%{
+          <card>
+            <number type="integer">103</number> 
+            <card_type url="https://localhost:7071/api/v2/projects/atlas/card_types/21.xml"> 
+              <name>epic</name> 
+            </card_type> 
+            <version type="integer">13</version> 
+          </card>
+        })
+    
+        card_data = CardData.new(dummy_mingle_access, 'atlas')
+        card_data.process_events([event])
+        
+        assert_correct_basic_card_data_for_event({:number => 103, :card_type_name => 'epic', :version => 13}, card_data, event)
+      end
+      
             
       private 
   

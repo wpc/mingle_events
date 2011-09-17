@@ -119,6 +119,7 @@ class Test::Unit::TestCase
     def initialize
       @pages_by_path = {}
       @not_found_pages = []
+      @exploding_pages = []
     end
     
     def base_url
@@ -132,12 +133,24 @@ class Test::Unit::TestCase
     def register_page_not_found(path)
       @not_found_pages << path
     end
+    
+    def register_explosion(path)
+      @exploding_pages << path
+    end
 
     def fetch_page(path)
       if @not_found_pages.include?(path)
         rsp = Net::HTTPNotFound.new(nil, '404', 'Page not found!')
         def rsp.body
           "404!!!!!"
+        end
+        raise MingleEvents::HttpError.new(rsp, path)
+      end
+      
+      if @exploding_pages.include?(path)
+        rsp = Net::HTTPNotFound.new(nil, '500', 'Server exploded!')
+        def rsp.body
+          "500!!!!!"
         end
         raise MingleEvents::HttpError.new(rsp, path)
       end

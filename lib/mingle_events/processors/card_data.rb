@@ -42,13 +42,35 @@ module MingleEvents
       
       def load_bulk_card_data
         @card_data_by_number_and_version = {}
-        
-        # TODO: figure out max number of card numbers before we have to chunk this up.  or does mingle
-        # figure out how to handle a too-large IN clause?
+                
         card_numbers = @card_events.map(&:card_number).uniq
         path = "/api/v2/projects/#{@project_identifier}/cards/execute_mql.xml?mql=WHERE number IN (#{card_numbers.join(',')})"
         
-        raw_xml = @mingle_access.fetch_page(URI.escape(path))
+        # TODO: figure out whether it makes sense to chunk a large count of card numbers
+        # into multiple requests so that the MQL "IN" clause doesn't explode. For now, we'll
+        # just punt by logging the error and letting the individual card data load explode
+        # if there's a real problem. In most polling scenarios, this is a highly unlikely
+        # problem as there will usually be 1 or a few events.
+        begin
+          raw_xml = @mingle_access.fetch_page(URI.escape(path))
+        rescue
+          msg = %{
+
+There was an error while attempting bulk load of card data. 
+Individual data loads for each card will still be attempted.
+
+Root cause: 
+
+#{$!.message}
+
+Stack Trace: 
+
+#{($!.backtrace || []).join("\n")}
+
+}
+          MingleEvents.log.info(msg)
+          return
+        end
         doc = Nokogiri::XML(raw_xml)
         
         doc.search('/results/result').map do |card_result|
