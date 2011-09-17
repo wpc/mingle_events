@@ -4,7 +4,9 @@ h3. Overview
 
 Mingle 3.3 introduced a new Events API in the form of an "Atom feed":http://www.thoughtworks-studios.com/mingle/3.3/help/mingle_api_events.html. The Mingle team and ThoughtWorks Studios are big believers in the use of Atom for exposing events. Atom is a widely used standard, and this event API style puts the issue of robust event delivery in the hands of the consumer, where it belongs. In fact, we'd argue this is the only feasible means of robust, scalable event delivery, short of spending hundreds of thousands or millions of dollars on enterprise buses and such. Atom-delivered events are cheap, scalable, standards-based, and robust.
 
-However, we do accept that asking integrators wishing to consume events to implement polling is not ideal. Writing polling consumers can be tedious. And this tedium gets in the way of writing sweet Mingle integrations. We are addressing this by publishing libraries such as this, which if effective, fully hide the mechanics of event polling from the consumer. The consumer only need worry about the processing of events. Said processing is modeled in the style of 'pipes and filters.'
+However, we do accept that asking integrators wishing to consume events to implement polling is not ideal. Writing polling consumers can be tedious. And this tedium gets in the way of writing sweet Mingle integrations. We are addressing this by publishing libraries such as this, which if effective, fully hide the mechanics of event polling from the consumer. The consumer only need worry about the processing of events. 
+
+The library supports both basic event analysis as well as polling for purposes of filtering and processing, e.g., re-publishing. The polling and processing portion is modeled in the style of 'pipes and filters.'
 
 h3. Installation
 
@@ -20,35 +22,68 @@ h3. Source
 git clone git://github.com/ThoughtWorksStudios/mingle_events.git
 </pre>
   
-h2. Quick example
+h2. Quick examples
+
+h3. Get the latest events, from time zero
+
+The event fetcher will manage it's own state, so fetch_latest can be called repeatedly to fetch only new events.
 
 <pre>
-# configure access to mingle
 mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
+event_fetcher = MingleEvents::ProjectEventFetcher.new('my_project', mingle_access)
+latest_events = event_fetcher.fetch_latest
+</pre>
 
-# assemble processing pipeline
+h3. Get the latest events, from now
+
+A call to reset_to_now will tell the fetcher only to pull new stuff, starting now.
+
+<pre>
+mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
+event_fetcher = MingleEvents::ProjectEventFetcher.new('my_project', mingle_access)
+latest_events = event_fetcher.reset_to_now
+latest_events = event_fetcher.fetch_latest
+</pre>
+
+h3. Historical analysis, via event playback
+
+One of the great usages of event playback is historical analysis. E.g., if you wanted to see the number of stories added each day to your project, you could write a processor that counts new stories and takes a snapshot at the end of each day, where the end of the day is the first time you see an event for the next day. If you are doing this sort of analysis you will not want to poll the entire project's event history every time as that is quite time consuming. 
+
+The assumption is that you've previously fetched the latest events. Or at least you've fetched the events in which you are interested. Use all_fetched_entries to load previously fetched events, they're all cached on disk so you don't pay the prices of retrieving from Mingle.
+
+<pre>
+event_fetcher = MingleEvents::ProjectEventFetcher.new('my_project', mingle_access)
+event_fetcher.all_fetched_entries.each do |e|
+  # do something interesting with each event (see examples folder for real analysis examples)
+end  
+</pre>
+
+h3. Polling and processing events via a pipeline
+
+You can poll Mingle for new events at regular intervals and process those events to do things such as filter to events you are interested in and post them to other systems with which you wish to integrate Mingle. This example posts all new comments to an HTTP end point. You'd need to use cron or a similar scheduler to run it at regular intervals. 
+
+<pre>
 post_comments_to_another_service = MingleEvents::Processors::Pipeline.new([
   MingleEvents::Processors::CategoryFilter.new([MingleEvents::Feed::Category::COMMENT_ADDITION]),
   MingleEvents::Processors::HttpPostPublisher.new('http://localhost:4567/')
 ])
-
-# poll once
 MingleEvents::Poller.new(mingle_access, {'test_project' => [post_comments_to_another_service]}).run_once  
 </pre>
 
-h2. High level design
+A more detailed dive into the polling and processing design follows.
 
-This library pumps the stream of a Mingle project's events through a pipeline of processors that you specify. The processors can do things such as "filter out any events that are not sourced from a Story" or "post an event to an HTTP end-point." 
+h2. Polling and processing
+
+h3. High level design
+
+The Poller class can pump the stream of a Mingle project's events through a pipeline of processors that you specify. The processors can do things such as "filter out any events that are not sourced from a Story" or "post an event to an HTTP end-point." 
 
 !http://thoughtworksstudios.github.com/mingle_events_design.png!
 
 As stated in the opening paragraph, the aim of this library is to hide the mechanics of event polling, making the user's focus solely the definition of the processing pipeline. This library supplies fundamental event processors, such as card type filters, atom category filters, and http publishers. This library should also make it easy for you to write custom processors.
 
-h2. Events and entries
 
-You might get confused looking at the source code as to what's an Atom entry and what's a Mingle event. We're still trying to clean that up a bit, but for all intents and purposes, they are the same thing. The Atom feed represents Mingle events in the form of Atom entries. For the most part we try to use the word 'entry' in the context of the feed and 'event' in the context of processing.
-
-h2. Processors, filters, and pipelines
+h3. Processors, filters, and pipelines
 
 Processors, filters, and pipelines are all processors with the same interface. The fundamental model for pipes and filters, or pipelining, is that there is a single, common interface for processing input and returning output. In this context of Mingle event processing, the interface is basically "events in, events out" where "events in" is the list of unprocessed events and "events out" are the processed events.  Processed events might be enriched, filtered, untouched but emailed, etc. 
 
@@ -56,10 +91,11 @@ This library ships the following processors:
 * MingleEvents::Processors::CardData -- loads data for each card that sourced an event in the current stream. This processor requires some special handling (see next section).
 * MingleEvents::Processors::CardTypeFilter -- filters events to those sourced by cards of specific card type(s)
 * MingleEvents::Processors::CategoryFilter -- filters events to those with specified Atom categories. Mingle's Atom Categories are specified in MingleEvents::Category
+* MingleEvents::Processors::CustomPropertyFilter -- filters events to those with the specified value of a single project-level custom property
 * MingleEvents::Processors::HttpPostPublisher -- posts event's raw XML to an HTTP endpoint
 * MingleEvents::Processors::Pipeline -- manages to processing of events by a sequence of processors
 
-h2. Card Data
+h3. Card Data
 
 CardData is a special processor in that it implements a second interface, beyond event processing. This interface is one that allows the lookup of data for the card that sourced the event (if the event was actually sourced by a card). As looking up card data requires accessing additional Mingle server resources, you want to take special care that you don't make repeated requests for the same resources. If you have multiple processors requiring CardData, be sure to use a single instance of CardData across your entire pipeline.
 
@@ -76,9 +112,7 @@ post_commenting_on_high_priority_bugs_and_stories = MingleEvents::Processors::Pi
 
 Note that CardData will provide data for the version of the card that was created by the event you are processing and *not* the current version of the card.  
 
-(For users familiar with earlier versions of this library, you will notice that the bulk loading of card data is currently not being taken advantage of. This is because I needed to change some internals of event broadcasting such that processing a big project's entire history did not cause OOM issues. I will very soon restore the bulk loading optimization for when the poller is simply reading the last handful of events. CardData still works, you just might see your client making a few more calls to Mingle.)
-
-h2. Writing your own processor
+h3. Writing your own processor
 
 In ruby code, the processing interface is a single method named 'process_events' that has a single parameter, the list of unprocessed events' and returns a list of the processed events. 
 
@@ -110,24 +144,11 @@ Be absolutely sure that any processor you write returns a list of events. If you
 
 Each event that is passed to the processor is an instance of type MingleEvents::Entry which is a Ruby wrapper around an Atom event. The Entry class makes it easy to access information such as author, Atom categories, whether the event was sourced by a card, etc. As the model is not yet complete, the Entry class also exposes the raw XML of the entry.
 
-(If you are wondering why the interface for processing is for a list of events rather than a single event, it is because of the above mentioned bulk loading of card data. This may change in the future. CardData may get its own special interface to perform a pre-processing bulk load, and the event processing interface will move to a single event at a time.)
-
-h2. Retry & Error handling
+h3. Retry & Error handling
 
 As of now, retry is not implemented. If an error occurs during event processing, the error will be logged and processing will stop. The next run will re-start at the point of the last error.
 
-h2. Historical analysis
+h2. Events and entries
 
-One of the great usages of event playback is historical analysis. E.g., if you wanted to see the number of stories added each day to your project, you could write a processor that counts new stories and takes a snapshot at the end of each day, where the end of the day is the first time you see an event for the next day. If you are doing this sort of analysis you will not want to poll the entire project's event history every time as that is quite time consuming. 
-
-It is possible to repeatedly run analysis against previously fetched events using the ProjectEventFetcher class that is only used in the internals of the standard polling mechanism.  ProjectEventFetcher does most of the real work of reading new events from the server and making them available for local processing, so it's not a bad class to get to know.
-
-<pre>
-event_fetcher = MingleEvents::ProjectEventFetcher.new('my_project', mingle_access)
-event_fetcher.all_fetched_entries.each do |e|
-  # do something interesting with each event
-end  
-</pre>
-
-Until there's time for further documentation take a look at card_count_by_day.rb and story_count_by_day.rb in the examples folder.
+You might get confused looking at the source code, documentation, etc. as to what's an Atom entry and what's a Mingle event. We're still trying to clean that up a bit, but for all intents and purposes, they are the same thing. The Atom feed represents Mingle events in the form of Atom entries. For the most part we try to use the word 'entry' in the context of the feed and 'event' in the context of processing, but there's still cleanup to be done.
 
