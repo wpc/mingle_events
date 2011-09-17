@@ -1,6 +1,10 @@
 module MingleEvents
   
   # fetch all unseen events and write them to disk for future processing
+  # 
+  # this class is messy and needs some cleanup, but some things are in here
+  # for a reason. specifically, for historical analysis, we can process each event,
+  # one at at time, reading it off disk, to avoid massive memory consumption.
   class ProjectEventFetcher
     
     def initialize(project_identifier, mingle_access, state_dir=nil)
@@ -18,7 +22,7 @@ module MingleEvents
     
     # setup fetcher to only fetch new events, occuring beyond "right now"
     def reset_to_now
-      reset
+      return if last_entry_fetched
       
       latest_event = page_with_latest_entries.entries.first
       return if latest_event.nil?

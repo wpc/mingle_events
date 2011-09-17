@@ -89,6 +89,38 @@ module MingleEvents
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end
     
+    def test_reset_to_now_is_ignored_if_there_is_already_local_current_state
+      state_dir = temp_dir
+      mingle_access = stub_mingle_access
+      fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
+      fetcher.fetch_latest  # bring current state up to 103
+            
+      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml',%{
+        <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="self"/>
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2" rel="next"/>
+
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/104</id>
+            <title>entry 104</title>
+            <updated>2011-02-03T08:14:42Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/103</id>
+            <title>entry 103</title>
+            <updated>2011-02-03T08:12:42Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+        </feed>
+      })
+            
+      fetcher.reset_to_now # if not ignored, next call would return no events rather than 104
+      assert_equal([entry(104)], fetcher.fetch_latest.to_a)
+    end
+    
     def test_reset_to_now_when_project_has_no_previous_history
       state_dir = temp_dir
       mingle_access = StubMingleAccess.new

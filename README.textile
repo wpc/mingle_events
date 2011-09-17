@@ -26,7 +26,7 @@ h2. Quick examples
 
 h3. Get the latest events, from time zero
 
-The event fetcher will manage it's own state, so fetch_latest can be called repeatedly to fetch only new events.
+The event fetcher will manage it's own state, so fetch_latest can be called repeatedly to fetch only new events. The first fetch will crawl all the way back to the very first event in the project's history.
 
 <pre>
 mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
@@ -36,7 +36,7 @@ latest_events = event_fetcher.fetch_latest
 
 h3. Get the latest events, from now
 
-A call to reset_to_now will tell the fetcher only to pull new stuff, starting now.
+Similar to the previous example, but a call to reset_to_now will tell the fetcher only to pull new stuff, starting now. If reset_now has been previously called, it will be ignored, and events will be fetched to the last seen event. If you have called reset_now previously, but really do wish to reset to now, you can call reset followed by reset_to_now.
 
 <pre>
 mingle_access = MingleEvents::MingleBasicAuthAccess.new('https://localhost:7071', 'david', 'p')
