@@ -1,5 +1,7 @@
 require 'cgi'
 
+require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'filter'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'processor'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'card_data'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'category_filter'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'processors', 'card_type_filter'))

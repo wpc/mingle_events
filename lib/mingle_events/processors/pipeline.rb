@@ -17,4 +17,5 @@ module MingleEvents
       end
     end
   end
+  
 end

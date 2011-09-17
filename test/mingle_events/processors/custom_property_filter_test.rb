@@ -5,41 +5,35 @@ module MingleEvents
     
     class CustomPropertyFilterTest < Test::Unit::TestCase
   
-      def test_filters_events_on_custom_property
-        event_1 = stub_event(true)
-        event_2 = stub_event(false)
-        event_3 = stub_event(true)
-        event_4 = stub_event(true)
-        event_5 = stub_event(true)
+      def setup
+        @high_priority_event = stub_event(true)
+        @page_event = stub_event(false)
+        @low_priority_event = stub_event(true)
+        @high_severity_event = stub_event(true)
         
-        card_data = {
-          event_1 => {:custom_properties => {'Priority' => 'High'}},
-          event_3 => {:custom_properties => {'Priority' => 'Low'}},
-          event_4 => {:custom_properties => {'Priority' => 'High'}},
-          event_5 => {:custom_properties => {'Severity' => 'High'}}
+        @card_data = {
+          @high_priority_event => {:custom_properties => {'Priority' => 'High'}},
+          @low_priority_event => {:custom_properties => {'Priority' => 'Low'}},
+          @high_severity_event => {:custom_properties => {'Severity' => 'High'}}
         }
-        def card_data.for_card_event(card_event)
+        def @card_data.for_card_event(card_event)
           self[card_event]
         end
         
-        filter = CustomPropertyFilter.new('Priority', 'High', card_data)
-        filtered_events = filter.process_events([event_1, event_2, event_3, event_4, event_5])
-        assert_equal([event_1, event_4], filtered_events)
+        @filter = CustomPropertyFilter.new('Priority', 'High', @card_data)
+      end
+
+      def test_match_on_property_value
+        assert @filter.match?(@high_priority_event)
+        assert !@filter.match?(@low_priority_event)
+        assert !@filter.match?(@high_severity_event)
       end
       
-      def test_drops_events_for_deleted_cards
-        event_1 = stub_event(true)
-        
-        card_data = {}
-        def card_data.for_card_event(card_event)
-          self[card_event]
-        end
-        
-        filter = CustomPropertyFilter.new('Priority', 'High', card_data)
-        filtered_events = filter.process_events([event_1])
-        assert_equal([], filtered_events)
+      def test_does_not_match_delete_card
+        @card_data[@high_priority_event] = nil
+        assert !@filter.match?(@high_priority_event)
       end
-      
+              
       private
       
       def stub_event(is_card)

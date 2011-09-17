@@ -3,17 +3,20 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'test_hel
 module MingleEvents
   module Processors
     class CategoryFilterTest < Test::Unit::TestCase
-  
-      def test_removes_events_without_matching_categories
-        event_1 = stub_event(1, [Feed::Category::CARD, Feed::Category::COMMENT_ADDITION])
-        event_2 = stub_event(2, [Feed::Category::CARD, Feed::Category::PROPERTY_CHANGE])
-        event_3 = stub_event(3, [Feed::Category::REVISION_COMMIT])
-        event_4 = stub_event(4, [Feed::Category::CARD, Feed::Category::PROPERTY_CHANGE])
-        event_5 = stub_event(5, [])
-        events = [event_1, event_2, event_3, event_4, event_5]
-    
-        filter = CategoryFilter.new([Feed::Category::CARD, Feed::Category::PROPERTY_CHANGE])
-        assert_equal([event_2, event_4], filter.process_events(events))
+        
+      def test_match_against_one_category
+        filter = CategoryFilter.new([Feed::Category::CARD])
+        assert filter.match?(stub_event(1, [Feed::Category::CARD, Feed::Category::COMMENT_ADDITION]))
+        assert filter.match?(stub_event(1, [Feed::Category::CARD]))
+        assert !filter.match?(stub_event(1, [Feed::Category::COMMENT_ADDITION]))
+        assert !filter.match?(stub_event(1, [Feed::Category::REVISION_COMMIT, Feed::Category::COMMENT_ADDITION]))
+      end
+      
+      def test_match_against_multiple_categories
+        filter = CategoryFilter.new([Feed::Category::CARD, Feed::Category::COMMENT_ADDITION])
+        assert filter.match?(stub_event(1, [Feed::Category::CARD, Feed::Category::COMMENT_ADDITION]))
+        assert !filter.match?(stub_event(1, [Feed::Category::CARD]))
+        assert !filter.match?(stub_event(1, [Feed::Category::REVISION_COMMIT, Feed::Category::COMMENT_ADDITION]))
       end
       
       private 

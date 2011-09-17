@@ -2,13 +2,9 @@ module MingleEvents
   module Processors
     
     # Writes each event in stream to stdout, mostly for demonstration purposes
-    class PutsPublisher
+    class PutsPublisher < Processor
       
-      def process_events(events)
-        events.map{|e| process_event(e)}
-      end
-
-      def process_event(event) 
+      def process(event) 
         puts "Processing event #{event}"
       end
     

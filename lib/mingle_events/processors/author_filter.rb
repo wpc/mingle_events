@@ -2,7 +2,7 @@ module MingleEvents
   module Processors
     
     # Removes all events from stream not triggered by the specified author
-    class AuthorFilter
+    class AuthorFilter < Filter
     
       def initialize(spec, mingle_access, project_identifier)
         unless spec.size == 1
@@ -12,10 +12,10 @@ module MingleEvents
         @author_spec = AuthorSpec.new(spec, mingle_access, project_identifier)
       end
     
-      def process_events(events)
-        events.select{|event| @author_spec.event_triggered_by?(event)}
+      def match?(event)
+        @author_spec.event_triggered_by?(event)
       end
-      
+          
       class AuthorSpec
         
         def initialize(spec, mingle_access, project_identifier)

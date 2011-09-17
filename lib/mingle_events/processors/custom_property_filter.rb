@@ -9,22 +9,20 @@ module MingleEvents
     # and this filtering, the event will be filtered as there is no means
     # to determine its type. Therefore, it's recommended to also
     # subscribe a 'CardDeleted' processor to the same project.    
-    class CustomPropertyFilter
+    class CustomPropertyFilter < Filter
     
       def initialize(property_name, property_value, card_data)
         @property_name = property_name
         @property_value = property_value
         @card_data = card_data
       end
-    
-      def process_events(events)
-        events.select do |event|
-          event.card? && 
-            @card_data.for_card_event(event) &&
-            @property_value == @card_data.for_card_event(event)[:custom_properties][@property_name]
-        end
+      
+      def match?(event)
+        event.card? && 
+          @card_data.for_card_event(event) &&
+          @property_value == @card_data.for_card_event(event)[:custom_properties][@property_name]
       end
-
+    
     end
   end
 end

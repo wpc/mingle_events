@@ -8,21 +8,19 @@ module MingleEvents
     # and this filtering, the event will be filtered as there is no means
     # to determine its type. Therefore, it's recommended to also
     # subscribe a 'CardDeleted' processor to the same project.    
-    class CardTypeFilter
+    class CardTypeFilter < Filter
     
       def initialize(card_types, card_data)
         @card_types = card_types
         @card_data = card_data
       end
-    
-      def process_events(events)
-        events.select do |event|
-          event.card? && 
-            @card_data.for_card_event(event) &&
-            @card_types.include?(@card_data.for_card_event(event)[:card_type_name])
-        end
+      
+      def match?(event)
+        event.card? && 
+          @card_data.for_card_event(event) &&
+          @card_types.include?(@card_data.for_card_event(event)[:card_type_name])
       end
-
+     
     end
   end
 end

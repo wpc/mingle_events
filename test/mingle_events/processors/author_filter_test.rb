@@ -33,9 +33,8 @@ module MingleEvents
         @event_1 = stub_event(1, {:uri => "http://example.com/users/10.xml", :login => 'ctester'})
         @event_2 = stub_event(2, {:uri => "http://example.com/users/17.xml", :login => 'jdeveloper'})
         @event_3 = stub_event(3, {:uri => "http://example.com/users/10.xml", :login => 'ctester'})
-        @unprocessed_events = [@event_1, @event_2, @event_3]
       end
-      
+            
       def test_filter_can_only_be_constructed_with_a_single_criteria
         begin
           AuthorFilter.new({:url => 'foo', :email => 'bar'}, nil, nil)
@@ -45,30 +44,24 @@ module MingleEvents
                end
       end
   
-      def test_filter_by_author_url
+      def test_match_on_author_url
         author_filter = AuthorFilter.new({:url => 'http://example.com/users/10.xml'}, @dummy_mingle_access, 'atlas')
-        filtered_events = author_filter.process_events(@unprocessed_events)
-        assert_equal([@event_1, @event_3], filtered_events)
+        assert author_filter.match?(@event_1)
+        assert !author_filter.match?(@event_2)
       end
       
-      def test_filter_by_author_login
+      def test_match_on_author_login
         author_filter = AuthorFilter.new({:login => 'ctester'}, @dummy_mingle_access, 'atlas')
-        filtered_events = author_filter.process_events(@unprocessed_events)
-        assert_equal([@event_1, @event_3], filtered_events)
+        assert author_filter.match?(@event_1)
+        assert !author_filter.match?(@event_2)
       end
       
-      def test_filter_by_author_email
+      def test_match_on_author_email
         author_filter = AuthorFilter.new({:email => 'joe.developer@example.com'}, @dummy_mingle_access, 'atlas')
-        filtered_events = author_filter.process_events(@unprocessed_events)
-        assert_equal([@event_2], filtered_events)
+        assert !author_filter.match?(@event_1)
+        assert author_filter.match?(@event_2)
       end
-      
-      def test_filter_returns_empty_list_when_no_match
-        author_filter = AuthorFilter.new({:email => 'sammy.soso@example.com'}, @dummy_mingle_access, 'atlas')
-        filtered_events = author_filter.process_events(@unprocessed_events)
-        assert_equal([], filtered_events)
-      end
-      
+            
       private
       
       def stub_event(entry_id, author)
