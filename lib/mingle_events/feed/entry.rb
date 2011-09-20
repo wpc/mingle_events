@@ -82,6 +82,10 @@ module MingleEvents
         raise "You cannot get card version data for an event that is not sourced by a card!" unless card?      
         @card_version_resource_uri ||= parse_card_version_resource_uri
       end
+      
+      def links
+        Links.new(@entry_element)
+      end
   
       def to_s
         "Entry[entry_id=#{entry_id}, updated=#{updated}]"

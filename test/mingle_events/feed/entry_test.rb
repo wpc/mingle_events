@@ -149,6 +149,18 @@ module MingleEvents
         assert entry_2 != entry_3
       end
       
+      def test_construct_links
+        element_xml_text = %{
+          <entry>
+            <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
+            <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
+            <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>
+          </entry>}
+        entry = Entry.from_snippet(element_xml_text)
+        links = entry.links.to_a
+        assert_equal 2, links.count
+      end
+      
     end
   
   end
