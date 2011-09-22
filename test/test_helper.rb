@@ -12,8 +12,19 @@ MingleEvents.log.level = Logger::WARN
 
 class Test::Unit::TestCase 
   
+  EMPTY_EVENTS_XML = %{
+    <?xml version="1.0" encoding="UTF-8"?>
+    <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+      <title>Mingle Events: Blank Project</title>
+      <id>https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml</id>
+      <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="current"/>
+      <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="self"/>
+      <updated>2011-08-04T19:42:04Z</updated>
+    </feed>
+  }
+  
   # page 3
-  LATEST_PAGE_CONTENT = %{
+  LATEST_EVENTS_XML = %{
     <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
     
       <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
@@ -42,7 +53,7 @@ class Test::Unit::TestCase
   }  
    
   # page 2
-  PAGE_2_CONTENT = %{
+  PAGE_2_EVENTS_XML = %{
     <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
     
       <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
@@ -74,7 +85,7 @@ class Test::Unit::TestCase
   }    
     
   # page 1
-  PAGE_1_CONTENT = %{
+  PAGE_1_EVENTS_XML = %{
     <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
     
       <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
@@ -92,14 +103,14 @@ class Test::Unit::TestCase
   
   def stub_mingle_access
     stub = StubMingleAccess.new
-    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', LATEST_PAGE_CONTENT)
-    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2', PAGE_2_CONTENT)
-    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1', PAGE_1_CONTENT)
-    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3', LATEST_PAGE_CONTENT)
-    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml', LATEST_PAGE_CONTENT)
-    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=2', PAGE_2_CONTENT)
-    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=1', PAGE_1_CONTENT)
-    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=3', LATEST_PAGE_CONTENT)
+    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', LATEST_EVENTS_XML)
+    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2', PAGE_2_EVENTS_XML)
+    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=1', PAGE_1_EVENTS_XML)
+    stub.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=3', LATEST_EVENTS_XML)
+    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml', LATEST_EVENTS_XML)
+    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=2', PAGE_2_EVENTS_XML)
+    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=1', PAGE_1_EVENTS_XML)
+    stub.register_page_content('/api/v2/projects/atlas/feeds/events.xml?page=3', LATEST_EVENTS_XML)
 
     stub
   end 

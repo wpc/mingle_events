@@ -40,15 +40,7 @@ module MingleEvents
     def test_no_new_entries_with_no_current_state
       state_dir = temp_dir
       mingle_access = StubMingleAccess.new
-      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml',%{
-<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
-  <title>Mingle Events: Blank Project</title>
-  <id>https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml</id>
-  <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="current"/>
-  <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="self"/>
-  <updated>2011-08-04T19:42:04Z</updated>
-</feed>})
+      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', EMPTY_EVENTS_XML)
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
       
       assert fetcher.fetch_latest.to_a.empty?
@@ -121,21 +113,11 @@ module MingleEvents
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end
     
-    def test_reset_to_now_when_project_has_no_previous_history
+    def test_subseuqnce_reset_to_now_calls_when_project_initially_had_no_history_do_not_prevent_initial_events_from_being_seen
       state_dir = temp_dir
       mingle_access = StubMingleAccess.new
-      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml',%{
-<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
-  <title>Mingle Events: Blank Project</title>
-  <id>https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml</id>
-  <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="current"/>
-  <link href="https://mingle.example.com/api/v2/projects/blank_project/feeds/events.xml" rel="self"/>
-  <updated>2011-08-04T19:42:04Z</updated>
-</feed>})
+      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', EMPTY_EVENTS_XML)
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
-      fetcher.fetch_latest
-      
       fetcher.reset_to_now
       assert fetcher.fetch_latest.to_a.empty?
       
@@ -153,6 +135,7 @@ module MingleEvents
           </entry>
         </feed>
       })
+      fetcher.reset_to_now      
             
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end

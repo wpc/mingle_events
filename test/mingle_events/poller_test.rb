@@ -9,7 +9,11 @@ module MingleEvents
       processor_1 = DummyProcessor.new
       processor_2 = DummyProcessor.new
       poller = Poller.new(mingle_access, {'atlas' => [processor_1, processor_2]})
-      poller.run_once(:clean => true)
+      
+      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', EMPTY_EVENTS_XML)
+      poller.run_once
+      mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', LATEST_EVENTS_XML) 
+      poller.run_once
       
       expected_entry_ids = [
         'https://mingle.example.com/projects/atlas/events/index/23',

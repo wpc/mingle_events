@@ -22,7 +22,7 @@ module MingleEvents
     
     # setup fetcher to only fetch new events, occuring beyond "right now"
     def reset_to_now
-      return if last_entry_fetched
+      return if has_current_state?
       
       latest_event = page_with_latest_entries.entries.first
       return if latest_event.nil?
@@ -74,13 +74,13 @@ module MingleEvents
     # only public to facilitate testing
     def update_current_state(oldest_new_entry, most_recent_new_entry)
       current_state = load_current_state
-      if most_recent_new_entry
+      # if most_recent_new_entry
         current_state.merge!(:last_fetched_entry_info_file => file_for_entry(most_recent_new_entry))
         if current_state[:first_fetched_entry_info_file].nil?
           current_state.merge!(:first_fetched_entry_info_file => file_for_entry(oldest_new_entry))
         end
         File.open(current_state_file, 'w'){|out| YAML.dump(current_state, out)}
-      end
+      # end
     end 
     
     # only public to facilitate testing
@@ -116,6 +116,10 @@ module MingleEvents
       File.join(@state_dir, *relative_path_parts)
     end
     
+    def has_current_state?
+      File.exist?(current_state_file)
+    end
+    
     def current_state_file
       File.expand_path(File.join(@state_dir, 'current_state.yml'))
     end
@@ -131,7 +135,7 @@ module MingleEvents
     end
         
     def load_current_state
-      if File.exist?(current_state_file)
+      if has_current_state?
         YAML.load(File.new(current_state_file))
       else
         {:last_fetched_entry_info_file => nil, :first_fetched_entry_info_file => nil}
