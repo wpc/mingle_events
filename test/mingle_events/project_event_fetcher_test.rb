@@ -48,12 +48,12 @@ module MingleEvents
       assert_nil fetcher.last_entry_fetched
     end
     
-    def test_reset_to_now_when_project_has_previous_history
+    def test_set_current_state_to_now_if_no_current_state_when_project_has_previous_history
       state_dir = temp_dir
       mingle_access = stub_mingle_access
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
 
-      fetcher.reset_to_now
+      fetcher.set_current_state_to_now_if_no_current_state
       assert fetcher.fetch_latest.to_a.empty?
       
       mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml',%{
@@ -81,7 +81,7 @@ module MingleEvents
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end
     
-    def test_reset_to_now_is_ignored_if_there_is_already_local_current_state
+    def test_set_current_state_to_now_if_no_current_state_is_ignored_if_there_is_already_local_current_state
       state_dir = temp_dir
       mingle_access = stub_mingle_access
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
@@ -109,16 +109,16 @@ module MingleEvents
         </feed>
       })
             
-      fetcher.reset_to_now # if not ignored, next call would return no events rather than 104
+      fetcher.set_current_state_to_now_if_no_current_state
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end
     
-    def test_subseuqnce_reset_to_now_calls_when_project_initially_had_no_history_do_not_prevent_initial_events_from_being_seen
+    def test_subseuqnce_set_current_state_to_now_if_no_current_state_calls_when_project_initially_had_no_history_do_not_prevent_initial_events_from_being_seen
       state_dir = temp_dir
       mingle_access = StubMingleAccess.new
       mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', EMPTY_EVENTS_XML)
       fetcher = ProjectEventFetcher.new('atlas', mingle_access, state_dir)
-      fetcher.reset_to_now
+      fetcher.set_current_state_to_now_if_no_current_state
       assert fetcher.fetch_latest.to_a.empty?
       
       mingle_access.register_page_content('/api/v2/projects/atlas/feeds/events.xml',%{
@@ -135,7 +135,7 @@ module MingleEvents
           </entry>
         </feed>
       })
-      fetcher.reset_to_now      
+      fetcher.set_current_state_to_now_if_no_current_state      
             
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end

@@ -20,8 +20,7 @@ module MingleEvents
       FileUtils.rm_rf(@state_dir)
     end
     
-    # setup fetcher to only fetch new events, occuring beyond "right now"
-    def reset_to_now
+    def set_current_state_to_now_if_no_current_state
       return if has_current_state?
       
       latest_event = page_with_latest_entries.entries.first

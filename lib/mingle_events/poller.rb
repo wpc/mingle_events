@@ -16,7 +16,7 @@ module MingleEvents
       MingleEvents.log.info("MingleEvents::Poller about to poll once...")
       @processors_by_project_identifier.each do |project_identifier, processors|
         fetcher = ProjectEventFetcher.new(project_identifier, @mingle_access)
-        fetcher.reset_to_now # first time through, we only establish "now"
+        fetcher.set_current_state_to_now_if_no_current_state 
         latest_events = fetcher.fetch_latest.to_a
         processors.each{|p| p.process_events(latest_events)}        
       end
