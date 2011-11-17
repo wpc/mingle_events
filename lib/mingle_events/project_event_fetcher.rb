@@ -11,7 +11,8 @@ module MingleEvents
       @project_identifier = project_identifier
       @mingle_access = mingle_access
       base_uri = URI.parse(mingle_access.base_url)
-      @state_dir = File.expand_path(state_dir || File.join('~', '.mingle_events', base_uri.host, base_uri.port.to_s, project_identifier, 'fetched_events'))
+      @state_dir = state_dir || File.join('~', '.mingle_events', base_uri.host, base_uri.port.to_s)
+      @state_dir = File.expand_path(File.join(@state_dir, project_identifier, 'fetched_events'))
     end
     
     # blow away any existing state, when next used to fetch events from mingle
@@ -73,13 +74,12 @@ module MingleEvents
     # only public to facilitate testing
     def update_current_state(oldest_new_entry, most_recent_new_entry)
       current_state = load_current_state
-      # if most_recent_new_entry
-        current_state.merge!(:last_fetched_entry_info_file => file_for_entry(most_recent_new_entry))
-        if current_state[:first_fetched_entry_info_file].nil?
-          current_state.merge!(:first_fetched_entry_info_file => file_for_entry(oldest_new_entry))
-        end
-        File.open(current_state_file, 'w'){|out| YAML.dump(current_state, out)}
-      # end
+      current_state.merge!(:last_fetched_entry_info_file => file_for_entry(most_recent_new_entry))
+      if current_state[:first_fetched_entry_info_file].nil?
+        current_state.merge!(:first_fetched_entry_info_file => file_for_entry(oldest_new_entry))
+      end
+      FileUtils.mkdir_p(File.dirname(current_state_file))
+      File.open(current_state_file, 'w'){|out| YAML.dump(current_state, out)}
     end 
     
     # only public to facilitate testing
