@@ -116,13 +116,13 @@ class Test::Unit::TestCase
   end 
   
   def temp_dir
-    path = File.expand_path(File.join(File.dirname(__FILE__), 'tmp', ActiveSupport::SecureRandom.hex(16)))
+    path = File.expand_path(File.join(File.dirname(__FILE__), 'tmp',  ::SecureRandom.hex(16)))
     FileUtils.mkdir_p(path)
     path
   end
 
   def temp_file
-    File.join(temp_dir, ActiveSupport::SecureRandom.hex(16))
+    File.join(temp_dir, ::SecureRandom.hex(16))
   end
 
   class StubMingleAccess
