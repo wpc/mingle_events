@@ -23,4 +23,6 @@ module MingleEvents
   self.log = Logger.new(STDOUT)
   self.log.level = Logger::INFO
 
+
+  URIParser = URI.const_defined?(:Parser) ? URI::Parser.new : URI
 end

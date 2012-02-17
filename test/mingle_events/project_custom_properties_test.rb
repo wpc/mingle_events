@@ -25,7 +25,7 @@ module MingleEvents
       
       dummy_mingle_access = StubMingleAccess.new
       dummy_mingle_access.register_page_content(
-        URI.escape('/api/v2/projects/atlas/property_definitions.xml'),
+        URIParser.escape('/api/v2/projects/atlas/property_definitions.xml'),
         property_definitions_xml
       )
       

@@ -36,7 +36,7 @@ module MingleEvents
         
         def lookup_author_uri
           team_resource = "/api/v2/projects/#{@project_identifier}/team.xml"
-          @raw_xml ||= @mingle_access.fetch_page(URI.escape(team_resource))
+          @raw_xml ||= @mingle_access.fetch_page(URIParser.escape(team_resource))
           @doc ||= Nokogiri::XML(@raw_xml)
 
           users = @doc.search('/projects_members/projects_member/user').map do |user|

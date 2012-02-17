@@ -52,7 +52,7 @@ module MingleEvents
         # if there's a real problem. In most polling scenarios, this is a highly unlikely
         # problem as there will usually be 1 or a few events.
         begin
-          raw_xml = @mingle_access.fetch_page(URI.escape(path))
+          raw_xml = @mingle_access.fetch_page(URIParser.escape(path))
         rescue
           msg = %{
 
