@@ -27,6 +27,62 @@ module MingleEvents
       assert_equal entry(103), fetcher.last_entry_fetched
     end
     
+    def test_should_connect_existing_entries_and_newly_fetched_entries
+      state_dir = temp_dir
+      access = stub_mingle_access
+      fetcher = ProjectEventFetcher.new('atlas', access, state_dir)
+
+      fetcher.fetch_latest
+
+      feed_xml_with_new_entries = <<-XML
+        <feed xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
+
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="current"/>
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml" rel="self"/>
+          <link href="https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml?page=2" rel="next"/>
+
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/105</id>
+            <title>entry 105</title>
+            <updated>2011-02-03T08:12:42Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/104</id>
+            <title>entry 104</title>
+            <updated>2011-02-03T08:12:42Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/103</id>
+            <title>entry 103</title>
+            <updated>2011-02-03T08:12:42Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/101</id>
+            <title>entry 101</title>
+            <updated>2011-02-03T02:09:16Z</updated>
+            <author><name>Bob</name></author>
+          </entry>
+          <entry>
+            <id>https://mingle.example.com/projects/atlas/events/index/100</id>
+            <title>entry 100</title>
+            <updated>2011-02-03T01:58:02Z</updated>
+            <author><name>Mary</name></author>
+          </entry>
+        </feed>
+      XML
+
+      access.register_page_content('https://mingle.example.com/api/v2/projects/atlas/feeds/events.xml', feed_xml_with_new_entries)
+      access.register_page_content('/api/v2/projects/atlas/feeds/events.xml', feed_xml_with_new_entries)
+
+      fetcher.fetch_latest
+
+      assert_equal ['https://mingle.example.com/projects/atlas/events/index/104', 'https://mingle.example.com/projects/atlas/events/index/105'], fetcher.all_fetched_entries.map(&:entry_id)[-2..-1]
+    end
+
     def test_no_new_entries_with_current_state
       state_dir = temp_dir
       fetcher = ProjectEventFetcher.new('atlas', stub_mingle_access, state_dir)

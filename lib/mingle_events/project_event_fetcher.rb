@@ -40,14 +40,13 @@ module MingleEvents
       while !last_fetched_entry_seen && page
         page.entries.each do |entry|
                     
+          write_entry_to_disk(entry, next_entry)
           if last_fetched_entry && entry.entry_id == last_fetched_entry.entry_id
             last_fetched_entry_seen = true
             break
           end
-          
-          write_entry_to_disk(entry, next_entry)
+
           next_entry = entry
-        
         end
         page = page.next
       end
