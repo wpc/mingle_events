@@ -1,7 +1,6 @@
 require 'rake'
 require 'rake/testtask'
 
-require 'lib/mingle_events'
 
 task :default => [:test, :clean]
 

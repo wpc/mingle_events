@@ -22,7 +22,7 @@ module MingleEvents
         # assert_equal(element_xml_text.inspect, entry.raw_xml.inspect) 
         assert_equal("https://mingle.example.com/projects/mingle/events/index/234443", entry.entry_id)
         assert_equal("Page Special:HeaderActions changed", entry.title)
-        assert_equal("Thu Feb 03 08:12:42 UTC 2011", entry.updated.to_s)
+        assert_equal(Time.utc(2011, 2, 3, 8, 12, 42), entry.updated)
         assert_equal("Sammy Soso", entry.author.name)
       end
     
