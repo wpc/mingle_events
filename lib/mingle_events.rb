@@ -8,6 +8,7 @@ require 'rubygems'
 require 'nokogiri'
 
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'feed'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'xml'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'http_error'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'poller'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'mingle_basic_auth_access'))

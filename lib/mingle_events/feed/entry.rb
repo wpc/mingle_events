@@ -5,46 +5,46 @@ module MingleEvents
     # representing an event in Mingle.
     class Entry
       
-      # Construct with the wrapped Nokogiri Elem for the entry
+      # Construct with the wrapped Xml Elem for the entry
       def initialize(entry_element)
         @entry_element = entry_element
       end
       
       def self.from_snippet(entry_xml)
-        self.new(Nokogiri::XML(entry_xml).remove_namespaces!)        
+        self.new(Xml.parse(entry_xml))
       end
   
       # The raw entry XML from the Atom feed
       def raw_xml
-        @raw_xml ||= @entry_element.to_s
+        @raw_xml ||= Xml.raw_xml(@entry_element)
       end
   
       # The Atom entry's id value. This is the one true identifier for the entry,
       # and therefore the event.
       def entry_id
-        @entry_id ||= @entry_element.at("id").inner_text
+        @entry_id ||= Xml.inner_text(@entry_element, "id")
       end
       alias :event_id :entry_id
   
       # The Atom entry's title
       def title
-        @title ||= @entry_element.at('title').inner_text
+        @title ||= Xml.inner_text(@entry_element, 'title')
       end
   
       # The time at which entry was created, i.e., the event was triggered
       def updated
-        @updated ||= Time.parse(@entry_element.at("updated").inner_text)
+        @updated ||= Time.parse(Xml.inner_text(@entry_element, "updated"))
       end
   
       # The user who created the entry (triggered the event), i.e., changed project data in Mingle
-      def author 
-        @author ||= Author.new(@entry_element.at("author"))
+      def author
+        @author ||= Author.new(Xml.select(@entry_element, "author"))
       end
     
       # The set of Atom categoies describing the entry
       def categories
-        @categories ||= @entry_element.search("category").map do |category_element|
-          Category.new(category_element["term"], category_element["scheme"])
+        @categories ||= Xml.select_all(@entry_element, "category").map do |category_element|
+          Category.new(Xml.attr(category_element, "term"), Xml.attr(category_element, "scheme"))
         end
       end
       
@@ -55,7 +55,7 @@ module MingleEvents
       # The data in the change hashes reflect only what is in the XML as encriching them would 
       # require potentially many calls to the Mingle server resulting in very slow processing. 
       def changes
-        @changes ||= Changes.new(@entry_element.at("content/changes"))
+        @changes ||= Changes.new(Xml.select(@entry_element,"content/changes"))
       end
   
       # Whether the entry/event was sourced by a Mingle card
@@ -108,20 +108,17 @@ module MingleEvents
       private
   
       def parse_card_number
-        card_number_element = @entry_element.at(
-          "link[@rel='http://www.thoughtworks-studios.com/ns/mingle#event-source'][@type='application/vnd.mingle+xml']"
-        )
+        card_number_element = Xml.select(@entry_element,
+                                         "link[@rel='http://www.thoughtworks-studios.com/ns/mingle#event-source'][@type='application/vnd.mingle+xml']")
         # TODO: improve this bit of parsing :)
-        card_number_element["href"].split('/').last.split('.')[0..-2].join.to_i
+        Xml.attr(card_number_element, "href").split('/').last.split('.')[0..-2].join.to_i
       end
   
       def parse_card_version_resource_uri
-        card_number_element = @entry_element.at(
-          "link[@rel='http://www.thoughtworks-studios.com/ns/mingle#version'][@type='application/vnd.mingle+xml']"
-        )
-        card_number_element["href"]
+        card_number_element = Xml.select(@entry_element, 
+                                         "link[@rel='http://www.thoughtworks-studios.com/ns/mingle#version'][@type='application/vnd.mingle+xml']")
+        Xml.attr(card_number_element, "href")
       end
-  
     end
     
   end

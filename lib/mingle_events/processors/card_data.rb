@@ -71,19 +71,19 @@ Stack Trace:
           MingleEvents.log.info(msg)
           return
         end
-        doc = Nokogiri::XML(raw_xml)
+        doc = Xml.parse(raw_xml)
         
-        doc.search('/results/result').map do |card_result|
-          card_number = card_result.at('number').inner_text.to_i
-          card_version = card_result.at('version').inner_text.to_i
+        Xml.select_all(doc, '/results/result').map do |card_result|
+          card_number = Xml.inner_text(card_result, 'number').to_i
+          card_version = Xml.inner_text(card_result, 'version').to_i
           custom_properties = {}
           @card_data_by_number_and_version[data_key(card_number, card_version)] = {
             :number => card_number,
             :version => card_version,
-            :card_type_name => card_result.at('card_type_name').inner_text,
+            :card_type_name => Xml.inner_text(card_result, 'card_type_name'),
             :custom_properties => custom_properties
           }
-          card_result.children.each do |child|
+          Xml.children(card_result).each do |child|
             if child.name.index("cp_") == 0
               custom_properties[@custom_properties.property_name_for_column(child.name)] = 
                 nullable_value_from_element(child)
@@ -95,7 +95,7 @@ Stack Trace:
       def load_card_data_for_event(card_event)
         begin
           page_xml = @mingle_access.fetch_page(card_event.card_version_resource_uri)
-          doc = Nokogiri::XML(page_xml)
+          doc = Xml.parse(page_xml)
           custom_properties = {}
           result = {
             :number => card_event.card_number,
@@ -103,9 +103,9 @@ Stack Trace:
             :card_type_name => doc.at('/card/card_type/name').inner_text,
             :custom_properties => custom_properties
           }
-          doc.search('/card/properties/property').each do |property|
-            custom_properties[property.at('name').inner_text] = 
-              nullable_value_from_element(property.at('value'))
+          Xml.select_all(doc, '/card/properties/property').each do |property|
+            custom_properties[Xml.inner_text(property, 'name')] =
+              nullable_value_from_element(Xml.select(property, 'value'))
           end
           
           result
@@ -116,7 +116,7 @@ Stack Trace:
       end
   
       def nullable_value_from_element(element)
-        element['nil'] == 'true' ? nil : element.inner_text
+        Xml.attr(element, 'nil') == 'true' ? nil : Xml.inner_text(element)
       end
     end
     

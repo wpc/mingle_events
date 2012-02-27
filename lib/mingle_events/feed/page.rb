@@ -20,18 +20,18 @@ module MingleEvents
       end
   
       def next
-        next_url_element = page_as_document.at("link[@rel='next']")
+        next_url_element = Xml.select(page_as_document, "link[@rel='next']")
         if next_url_element.nil?
           nil
         else
-          Page.new(next_url_element["href"], @mingle_access)
+          Page.new(Xml.attr(next_url_element, "href"), @mingle_access)
         end
       end
   
       private    
   
       def page_as_document
-        @page_as_document ||= Nokogiri::XML(@mingle_access.fetch_page(@url)).remove_namespaces!
+        @page_as_document ||= Xml.parse(@mingle_access.fetch_page(@url))
       end
     
     end
