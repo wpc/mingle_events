@@ -14,6 +14,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'min
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'mingle_oauth_access'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'processors'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'project_custom_properties'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'entry_cache'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'mingle_events', 'project_event_fetcher'))
 
 module MingleEvents

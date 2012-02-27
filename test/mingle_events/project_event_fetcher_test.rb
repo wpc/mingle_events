@@ -191,8 +191,7 @@ module MingleEvents
           </entry>
         </feed>
       })
-      fetcher.set_current_state_to_now_if_no_current_state      
-            
+      fetcher.set_current_state_to_now_if_no_current_state
       assert_equal([entry(104)], fetcher.fetch_latest.to_a)
     end
     
@@ -202,9 +201,9 @@ module MingleEvents
       first_entry = entry(first_entry_id)
       second_entry = entry(second_entry_id)
       last_entry = entry(last_entry_id)
-      fetcher.write_entry_to_disk(first_entry, second_entry)
-      fetcher.write_entry_to_disk(last_entry, nil)  
-      fetcher.update_current_state(first_entry, last_entry)
+      fetcher.entry_cache.write(first_entry, second_entry)
+      fetcher.entry_cache.write(last_entry, nil)  
+      fetcher.entry_cache.update_current_state(first_entry, last_entry)
     end
             
     def entry(entry_id)
