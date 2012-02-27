@@ -40,8 +40,8 @@ module MingleEvents
           AuthorFilter.new({:url => 'foo', :email => 'bar'}, nil, nil)
           fail("Should not have been able to construct this filter!")
         rescue StandardError => e
-                 assert_equal(0, e.message.index("Author spec must contain 1 and only 1 piece of criteria"))
-               end
+          assert_equal(0, e.message.index("Author spec must contain 1 and only 1 piece of criteria"))
+        end
       end
   
       def test_match_on_author_url

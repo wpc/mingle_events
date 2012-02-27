@@ -37,13 +37,13 @@ module MingleEvents
         def lookup_author_uri
           team_resource = "/api/v2/projects/#{@project_identifier}/team.xml"
           @raw_xml ||= @mingle_access.fetch_page(URIParser.escape(team_resource))
-          @doc ||= Nokogiri::XML(@raw_xml)
+          @doc ||= Xml.parse(@raw_xml)
 
-          users = @doc.search('/projects_members/projects_member/user').map do |user|
+          users = Xml.select_all(@doc, '/projects_members/projects_member/user').map do |user|
             {
-              :url => user.attribute('url').inner_text,
-              :login => user.at('login').inner_text,
-              :email => user.at('email').inner_text
+              :url => Xml.attr(user, 'url'),
+              :login => Xml.inner_text(user, 'login'),
+              :email => Xml.inner_text(user, 'email')
             }
           end
           
