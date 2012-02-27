@@ -33,7 +33,7 @@ module MingleEvents
     def fetch_latest
       page = page_with_latest_entries
       most_recent_new_entry = page.entries.first
-      last_fetched_entry = @entry_cache.lastest
+      last_fetched_entry = @entry_cache.latest
       last_fetched_entry_seen = false      
       next_entry = nil
       while !last_fetched_entry_seen && page
@@ -65,7 +65,7 @@ module MingleEvents
     end
     
     def last_entry_fetched
-      @entry_cache.lastest
+      @entry_cache.latest
     end
                    
     private

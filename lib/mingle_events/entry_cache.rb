@@ -17,7 +17,7 @@ module MingleEvents
       current_state_entry(:first_fetched_entry_info_file)
     end
     
-    def lastest
+    def latest
       current_state_entry(:last_fetched_entry_info_file)
     end
     
