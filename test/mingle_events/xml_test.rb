@@ -33,7 +33,11 @@ module MingleEvents
     end
 
     def test_get_all_attributes
-      assert_equal({'x' => 's', 'y' => 't', 'z' => 'u'}, Xml.parse(%{<a x="s" y="t" z="u" />}).select('a').attributes)
+      assert_equal({'x' => 's', 'y' => 't', 'z' => 'u'}, Xml.parse('<a x="s" y="t" z="u" />').select('a').attributes)
+    end
+
+    def test_element_to_hash
+      assert_equal({:a => {:x => "s", :b => { :y => "t", :e => "0"}, :c => "1", :d => nil}}, Xml.parse('<a x="s"> <b y="t"> <e>0</e> </b> <c>1</c> <d nil="true" /> </a>').select("a").to_hash)
     end
 
     private

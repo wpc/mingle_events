@@ -10,15 +10,15 @@ module MingleEvents
       def nil?
         @node.nil?
       end
-      
-      ["inner_text", "optional_inner_text", "select", "select_all", "attr", "children", "tag_name", "raw_xml", "attributes"].each do |method|
+
+      ["inner_text", "optional_inner_text", "select", "select_all", "attr", "children", "tag_name", "raw_xml", "attributes", "to_hash"].each do |method|
         self.class_eval(%{def #{method}(*args, &block)  Xml.#{method}(self, *args); end})
       end
-      
+
       alias :[] :attr
     end
 
-    
+
     module_function
 
     def parse(str)
@@ -26,13 +26,14 @@ module MingleEvents
     end
 
     def inner_text(element, xpath=nil)
-      return element.node.inner_text unless xpath
-      select(element, xpath).inner_text
+      return select(element, xpath).inner_text if xpath
+      return nil if attr(element, "nil") && attr(element, "nil") == "true"
+      element.node.inner_text
     end
 
     def optional_inner_text(parent_element, xpath)
       element = select(parent_element, xpath)
-      element.nil? ? nil : element.inner_text
+      element.node.nil? ? nil : element.inner_text
     end
 
     def select(element, xpath)
@@ -64,6 +65,24 @@ module MingleEvents
         memo[a.name] = a.value
         memo
       end
+    end
+
+    def to_hash(element, hash={})
+      hash_for_element = (hash[tag_name(element).to_sym] ||= {})
+
+      attributes(element).each do |name, value|
+        hash_for_element[name.to_sym] = value
+      end
+
+      children(element).each do |child|
+        if children(child).any?
+          to_hash(child, hash_for_element)
+        else
+          hash_for_element[tag_name(child).to_sym] = inner_text(child)
+        end
+      end
+
+      hash
     end
   end
 end
