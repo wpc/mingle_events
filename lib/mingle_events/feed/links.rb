@@ -10,10 +10,8 @@ module MingleEvents
       RELATED_REL = "http://www.thoughtworks-studios.com/ns/mingle#related"
       
       def initialize(entry_element)
-        @links ||= Xml.select_all(entry_element, "link").map do |link_element|
-          Link.new(*(%w(href rel type title).map do |attr|
-                       Xml.attr(link_element, attr)
-                     end))
+        @links ||= entry_element.select_all("link").map do |link_element|
+          Link.new(*%w(href rel type title).map { |name| link_element.attr(name) })
         end
       end
       

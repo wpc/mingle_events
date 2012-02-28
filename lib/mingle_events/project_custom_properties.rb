@@ -18,8 +18,8 @@ module MingleEvents
     end
 
     def lookup_property_names_by_column_name
-      Xml.select_all(as_document, '/property_definitions/property_definition').inject({}) do |mapping, element|
-        mapping[Xml.inner_text(element, 'column_name')] = Xml.inner_text(element, 'name')
+      as_document.select_all('/property_definitions/property_definition').inject({}) do |mapping, element|
+        mapping[element.inner_text('column_name')] = element.inner_text('name')
         mapping
       end
     end

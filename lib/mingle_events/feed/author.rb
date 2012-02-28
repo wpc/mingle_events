@@ -14,9 +14,9 @@ module MingleEvents
       attr_reader :icon_uri
 
       def initialize(author_element)
-        @name = Xml.inner_text(author_element, "name")
+        @name = author_element.inner_text("name")
         @email, @uri, @icon_uri = *%w(email uri icon).map do |path|
-          Xml.optional_inner_text(author_element, path)
+          author_element.optional_inner_text(path)
         end
       end
 

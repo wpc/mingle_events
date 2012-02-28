@@ -73,19 +73,19 @@ Stack Trace:
         end
         doc = Xml.parse(raw_xml)
         
-        Xml.select_all(doc, '/results/result').map do |card_result|
-          card_number = Xml.inner_text(card_result, 'number').to_i
-          card_version = Xml.inner_text(card_result, 'version').to_i
+        doc.select_all('/results/result').map do |card_result|
+          card_number = card_result.inner_text('number').to_i
+          card_version = card_result.inner_text('version').to_i
           custom_properties = {}
           @card_data_by_number_and_version[data_key(card_number, card_version)] = {
             :number => card_number,
             :version => card_version,
-            :card_type_name => Xml.inner_text(card_result, 'card_type_name'),
+            :card_type_name => card_result.inner_text('card_type_name'),
             :custom_properties => custom_properties
           }
-          Xml.children(card_result).each do |child|
-            if child.name.index("cp_") == 0
-              custom_properties[@custom_properties.property_name_for_column(child.name)] = 
+          card_result.children.each do |child|
+            if child.tag_name.index("cp_") == 0
+              custom_properties[@custom_properties.property_name_for_column(child.tag_name)] = 
                 nullable_value_from_element(child)
             end
           end
@@ -100,12 +100,12 @@ Stack Trace:
           result = {
             :number => card_event.card_number,
             :version => card_event.version,
-            :card_type_name => doc.at('/card/card_type/name').inner_text,
+            :card_type_name => doc.select('/card/card_type/name').inner_text,
             :custom_properties => custom_properties
           }
-          Xml.select_all(doc, '/card/properties/property').each do |property|
-            custom_properties[Xml.inner_text(property, 'name')] =
-              nullable_value_from_element(Xml.select(property, 'value'))
+          doc.select_all('/card/properties/property').each do |property|
+            custom_properties[property.inner_text('name')] =
+              nullable_value_from_element(property.select('value'))
           end
           
           result
@@ -116,7 +116,7 @@ Stack Trace:
       end
   
       def nullable_value_from_element(element)
-        Xml.attr(element, 'nil') == 'true' ? nil : Xml.inner_text(element)
+        element.attr('nil') == 'true' ? nil : element.inner_text
       end
     end
     

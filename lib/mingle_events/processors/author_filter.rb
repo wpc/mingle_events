@@ -39,11 +39,11 @@ module MingleEvents
           @raw_xml ||= @mingle_access.fetch_page(URIParser.escape(team_resource))
           @doc ||= Xml.parse(@raw_xml)
 
-          users = Xml.select_all(@doc, '/projects_members/projects_member/user').map do |user|
+          users = @doc.select_all('/projects_members/projects_member/user').map do |user|
             {
-              :url => Xml.attr(user, 'url'),
-              :login => Xml.inner_text(user, 'login'),
-              :email => Xml.inner_text(user, 'email')
+              :url => user.attr('url'),
+              :login => user.inner_text('login'),
+              :email => user.inner_text('email')
             }
           end
           
