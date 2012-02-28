@@ -3,8 +3,6 @@ require 'test/unit'
 require 'ostruct'
 require 'fileutils'
 
-require 'rubygems'
-require 'active_support'
 
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib', 'mingle_events'))
 

@@ -4,7 +4,8 @@ module MingleEvents
   class EntryCacheTest < Test::Unit::TestCase
     
     def setup
-      @entry_cache = EntryCache.new("/tmp")
+      @entry_cache = EntryCache.new("/tmp/foo")
+      @entry_cache.clear
     end
     
     def test_stores_first_entry_under_root
@@ -36,7 +37,7 @@ module MingleEvents
       @entry_cache.write(entry(3), entry(4))
       @entry_cache.update_current_state(entry(3), entry(6))
 
-      assert_equal (1..6).map { |id| entry(id) }, @entry_cache.all_entries.to_a
+      assert_equal((1..6).map { |id| entry(id) }, @entry_cache.all_entries.to_a)
     end
     
     private
