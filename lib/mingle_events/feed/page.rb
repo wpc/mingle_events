@@ -14,13 +14,13 @@ module MingleEvents
       end
   
       def entries
-        @entries ||= page_as_document.select_all('entry').map do |entry_element|
+        @entries ||= page_as_document.select_all('./atom:feed/atom:entry').map do |entry_element|
           Entry.new(entry_element)
         end
       end
   
       def next
-        next_url_element = page_as_document.select("link[@rel='next']")
+        next_url_element = page_as_document.select("./atom:feed/atom:link[@rel='next']")
         if next_url_element.nil?
           nil
         else
@@ -31,7 +31,7 @@ module MingleEvents
       private    
   
       def page_as_document
-        @page_as_document ||= Xml.parse(@mingle_access.fetch_page(@url))
+        @page_as_document ||= Xml.parse(@mingle_access.fetch_page(@url), ATOM_AND_MINGLE_NS)
       end
     
     end

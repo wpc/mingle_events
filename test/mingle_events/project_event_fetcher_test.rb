@@ -22,6 +22,7 @@ module MingleEvents
       
       latest_entries = fetcher.fetch_latest
       expected_latest_entries = [98, 99, 100, 101, 103].map{|n| entry(n)}
+
       assert_equal(expected_latest_entries, latest_entries.to_a)
       assert_equal entry(23), fetcher.first_entry_fetched
       assert_equal entry(103), fetcher.last_entry_fetched
@@ -208,7 +209,7 @@ module MingleEvents
             
     def entry(entry_id)
       entry_xml = %{
-        <entry>
+        <entry xmlns="http://www.w3.org/2005/Atom">
           <id>https://mingle.example.com/projects/atlas/events/index/#{entry_id}</id>
           <title>entry #{entry_id}</title>
           <updated>2011-02-03T01:10:52Z</updated>

@@ -7,7 +7,7 @@ module MingleEvents
   
       def test_parse_basic_attributes
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom" >
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <title>Page Special:HeaderActions changed</title>
             <updated>2011-02-03T08:12:42Z</updated>
@@ -28,7 +28,7 @@ module MingleEvents
     
       def test_parse_categories
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="foo" scheme='http://tws.com/ns#mingle' />
             <category term="bar" scheme="http://tws.com/ns#go" />
           </entry>}
@@ -45,7 +45,7 @@ module MingleEvents
         # that the card number is derived from a single, precise position
       
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
             <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>
@@ -59,7 +59,7 @@ module MingleEvents
     
       def test_card_number_and_version_throws_error_when_event_not_related_to_a_card      
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
         entry = Entry.from_snippet(element_xml_text)
@@ -86,7 +86,7 @@ module MingleEvents
         # that the card number is derived from a single, precise position
       
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
             <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>
@@ -99,7 +99,7 @@ module MingleEvents
     
       def test_card_version_resource_uri_throws_error_when_not_card_event
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
         entry = Entry.from_snippet(element_xml_text)
@@ -113,7 +113,7 @@ module MingleEvents
     
       def test_entry_id_aliased_as_event_id
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
           </entry>}
         entry = Entry.from_snippet(element_xml_text)
@@ -123,21 +123,21 @@ module MingleEvents
       
       def test_entry_id_determines_equality
         element_xml_text_1 = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="page" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
         entry_1 = Entry.from_snippet(element_xml_text_1)
         
         element_xml_text_2 = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <id>https://mingle.example.com/projects/mingle/events/index/234443</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
         entry_2 = Entry.from_snippet(element_xml_text_2)
         
         element_xml_text_3 = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <id>https://mingle.example.com/projects/mingle/events/index/234</id>
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
           </entry>}
@@ -151,7 +151,7 @@ module MingleEvents
       
       def test_construct_links
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <category term="card" scheme="http://www.thoughtworks-studios.com/ns/mingle#categories"/>
             <link href="https://mingle.example.com/projects/atlas/cards/102" rel="http://www.thoughtworks-studios.com/ns/mingle#event-source" type="text/html" title="bug #103"/>
             <link href="https://mingle.example.com/api/v2/projects/atlas/cards/104.xml?version=7" rel="http://www.thoughtworks-studios.com/ns/mingle#version" type="application/vnd.mingle+xml" title="bug #105 (v7)"/>

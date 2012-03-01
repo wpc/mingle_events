@@ -11,7 +11,7 @@ module MingleEvents
       end
       
       def self.from_snippet(entry_xml)
-        self.new(Xml.parse(entry_xml))
+        self.new(Xml.parse(entry_xml, ATOM_AND_MINGLE_NS).select('/atom:entry'))
       end
   
       # The raw entry XML from the Atom feed
@@ -22,28 +22,28 @@ module MingleEvents
       # The Atom entry's id value. This is the one true identifier for the entry,
       # and therefore the event.
       def entry_id
-        @entry_id ||= @entry_element.inner_text("id")
+        @entry_id ||= @entry_element.inner_text("./atom:id")
       end
       alias :event_id :entry_id
   
       # The Atom entry's title
       def title
-        @title ||= @entry_element.inner_text('title')
+        @title ||= @entry_element.inner_text('./atom:title')
       end
   
       # The time at which entry was created, i.e., the event was triggered
       def updated
-        @updated ||= Time.parse(@entry_element.inner_text("updated"))
+        @updated ||= Time.parse(@entry_element.inner_text("./atom:updated"))
       end
   
       # The user who created the entry (triggered the event), i.e., changed project data in Mingle
       def author
-        @author ||= Author.new(@entry_element.select("author"))
+        @author ||= Author.new(@entry_element.select("./atom:author"))
       end
     
       # The set of Atom categoies describing the entry
       def categories
-        @categories ||= @entry_element.select_all("category").map do |category_element|
+        @categories ||= @entry_element.select_all("./atom:category").map do |category_element|
           Category.new(category_element.attr("term"), category_element.attr("scheme"))
         end
       end
@@ -55,7 +55,7 @@ module MingleEvents
       # The data in the change hashes reflect only what is in the XML as encriching them would 
       # require potentially many calls to the Mingle server resulting in very slow processing. 
       def changes
-        @changes ||= Changes.new(@entry_element.select("content/changes"))
+        @changes ||= Changes.new(@entry_element.select("./atom:content/mingle:changes"))
       end
   
       # Whether the entry/event was sourced by a Mingle card
@@ -108,13 +108,13 @@ module MingleEvents
       private
   
       def parse_card_number
-        card_number_element = @entry_element.select("link[@rel='http://www.thoughtworks-studios.com/ns/mingle#event-source'][@type='application/vnd.mingle+xml']")
+        card_number_element = @entry_element.select("./atom:link[@rel='http://www.thoughtworks-studios.com/ns/mingle#event-source'][@type='application/vnd.mingle+xml']")
         # TODO: improve this bit of parsing :)
         card_number_element.attr("href").split('/').last.split('.')[0..-2].join.to_i
       end
   
       def parse_card_version_resource_uri
-        card_number_element = @entry_element.select("link[@rel='http://www.thoughtworks-studios.com/ns/mingle#version'][@type='application/vnd.mingle+xml']")
+        card_number_element = @entry_element.select("./atom:link[@rel='http://www.thoughtworks-studios.com/ns/mingle#version'][@type='application/vnd.mingle+xml']")
         card_number_element.attr("href")
       end
     end

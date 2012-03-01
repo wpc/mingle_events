@@ -7,9 +7,9 @@ module MingleEvents
       
       def test_parse_multiple_changes
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="card-creation"/>
                 <change type="card-type-change">
                   <old_value nil="true"></old_value>
@@ -41,9 +41,9 @@ module MingleEvents
             
       def test_parse_name_change_from_nil
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="name-change">
                   <old_value nil="true" />
                   <new_value>Basic email integration</new_value>
@@ -62,9 +62,9 @@ module MingleEvents
       
       def test_parse_name_change
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="name-change">
                   <old_value>Work with email</old_value>
                   <new_value>Basic email integration</new_value>
@@ -83,9 +83,9 @@ module MingleEvents
       
       def test_parse_type_info_when_no_custom_builder_specified
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="card-creation"/>
               </changes>
             </content>
@@ -98,9 +98,9 @@ module MingleEvents
       
       def test_parse_card_type_change_from_nil
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="card-type-change">
                   <old_value nil="true"></old_value>
                   <new_value>
@@ -125,9 +125,9 @@ module MingleEvents
       
       def test_parse_card_type_change
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="card-type-change">
                   <old_value>
                     <card_type url="https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml">
@@ -156,9 +156,9 @@ module MingleEvents
       
       def test_parse_card_type_change_to_deleted_type
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="card-type-change">
                   <old_value>
                     <card_type url="https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml">
@@ -187,9 +187,9 @@ module MingleEvents
       
       def test_parse_card_property_change
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="property-change">
                   <property_definition 
                       url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">
@@ -220,9 +220,9 @@ module MingleEvents
       
       def test_parse_card_property_change_from_nil
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="property-change">
                   <property_definition 
                       url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">
@@ -246,9 +246,9 @@ module MingleEvents
       
       def test_parse_card_property_change_to_nil
         element_xml_text = %{
-          <entry>
+          <entry xmlns="http://www.w3.org/2005/Atom">
             <content type="application/vnd.mingle+xml">
-              <changes>
+              <changes xmlns="http://www.thoughtworks-studios.com/ns/mingle">
                 <change type="property-change">
                   <property_definition 
                       url="http://mingle.example.com/api/v2/projects/atlas/property_definitions/10418.xml">

@@ -7,7 +7,7 @@ module MingleEvents
   
       def test_parse_attributes
         author_xml = %{
-          <author >
+          <author xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
             <name>Sammy Soso</name>
             <email>sammy@example.com</email>
             <uri>https://mingle.example.com/api/v2/users/233.xml</uri>
@@ -23,7 +23,7 @@ module MingleEvents
     
       def test_parse_attributes_when_no_optional_fields
         author_xml = %{
-          <author>
+          <author xmlns="http://www.w3.org/2005/Atom" xmlns:mingle="http://www.thoughtworks-studios.com/ns/mingle">
             <name>Sammy Soso</name>
           </author>
         }

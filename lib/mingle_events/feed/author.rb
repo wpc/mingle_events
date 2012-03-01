@@ -14,14 +14,14 @@ module MingleEvents
       attr_reader :icon_uri
 
       def initialize(author_element)
-        @name = author_element.inner_text("name")
-        @email, @uri, @icon_uri = *%w(email uri icon).map do |path|
-          author_element.optional_inner_text(path)
-        end
+        @name = author_element.inner_text("./atom:name")
+        @email = author_element.optional_inner_text("./atom:email")
+        @uri = author_element.optional_inner_text("./atom:uri")
+        @icon_uri = author_element.optional_inner_text("./mingle:icon")
       end
 
-      def self.from_snippet(entry_xml)
-        self.new(Xml.parse(entry_xml))
+      def self.from_snippet(author_xml)
+        self.new(Xml.parse(author_xml, ATOM_AND_MINGLE_NS).select("/atom:author"))
       end
     end
 

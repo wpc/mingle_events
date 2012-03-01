@@ -2,9 +2,10 @@ module MingleEvents
   module Xml
 
     class Element
-      attr_reader :node
-      def initialize(node)
+      attr_reader :node, :namespaces
+      def initialize(node, namespaces)
         @node = node
+        @namespaces = namespaces
       end
 
       def nil?
@@ -21,12 +22,12 @@ module MingleEvents
 
     module_function
 
-    def parse(str)
-      Element.new(Nokogiri::XML(str).remove_namespaces!)
+    def parse(str, namespaces={})
+      Element.new(Nokogiri::XML(str), namespaces)
     end
 
     def inner_text(element, xpath=nil)
-      return select(element, xpath).inner_text if xpath
+      return inner_text(select(element, xpath)) if xpath
       return nil if attr(element, "nil") && attr(element, "nil") == "true"
       element.node.inner_text
     end
@@ -37,19 +38,20 @@ module MingleEvents
     end
 
     def select(element, xpath)
-      Element.new(element.node.at(xpath))
+      Element.new(element.node.at(xpath, element.namespaces), element.namespaces)
     end
 
     def select_all(element, xpath)
-      element.node.search(xpath).map { |n| Element.new(n) }
+      element.node.search(xpath, element.namespaces).map { |n| Element.new(n, element.namespaces) }
     end
 
     def attr(element, attr_name)
+      raise 'element selection is empty!' if element.nil?
       element.node[attr_name]
     end
 
     def children(element)
-      element.node.children.select { |e| e.is_a?(Nokogiri::XML::Element) }.map { |n| Element.new(n) }
+      element.node.children.select { |e| e.is_a?(Nokogiri::XML::Element) }.map { |n| Element.new(n, element.namespaces) }
     end
 
     def tag_name(element)
@@ -57,7 +59,12 @@ module MingleEvents
     end
 
     def raw_xml(element)
-      element.node.to_s
+      if node = element.node && element.node.clone
+        if node.namespace
+          node.add_namespace(node.namespace.prefix, node.namespace.href)
+        end
+        node.to_s
+      end
     end
 
     def attributes(element)

@@ -29,4 +29,8 @@ module MingleEvents
 
 
   URIParser = URI.const_defined?(:Parser) ? URI::Parser.new : URI
+  ATOM_AND_MINGLE_NS = {
+    'atom' => "http://www.w3.org/2005/Atom",
+    'mingle' => "http://www.thoughtworks-studios.com/ns/mingle"
+  }
 end

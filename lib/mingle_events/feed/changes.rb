@@ -18,7 +18,7 @@ module MingleEvents
 
       def parse_changes
         changes = []
-        @changes_element.select_all("change").map do |change_element|
+        @changes_element.select_all("./mingle:change").map do |change_element|
           category = Category.for_mingle_term(change_element["type"])
           changes <<  Change.new(category).build(change_element)
         end

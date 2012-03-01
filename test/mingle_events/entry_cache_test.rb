@@ -44,7 +44,7 @@ module MingleEvents
     
     def entry(id)
       element_xml_text = %{
-        <entry>
+        <entry xmlns="http://www.w3.org/2005/Atom">
           <id>https://mingle.example.com/projects/mingle/events/index/#{id}</id>
           <title>Page Special:HeaderActions changed</title>
           <updated>2011-02-03T08:12:42Z</updated>

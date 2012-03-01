@@ -28,7 +28,7 @@ module MingleEvents
       assert_equal ['s', 't', 'u'], Xml.parse(%{<a><s/> <t/> <u/> </a>}).select('a').children.map(&:tag_name)
     end
 
-    def test_get_raw_xml
+    def test_serialize_to_xml
       assert_equal_ignore_spaces "<b>s</b>", Xml.parse("<a><b>s</b></a>").select("a/b").raw_xml
     end
 
@@ -38,6 +38,21 @@ module MingleEvents
 
     def test_element_to_hash
       assert_equal({:a => {:x => "s", :b => { :y => "t", :e => "0"}, :c => "1", :d => nil}}, Xml.parse('<a x="s"> <b y="t"> <e>0</e> </b> <c>1</c> <d nil="true" /> </a>').select("a").to_hash)
+    end
+
+    def test_select_with_namespace
+      xml_with_ns = '<a xmlns="http://www.w3.org/2005/Atom" xmlns:foo="http://www.foo.com"> <foo:b>s</foo:b> </a>'
+      ns = {'atom' => "http://www.w3.org/2005/Atom", 'foo' => "http://www.foo.com"}
+      assert_equal "s", Xml.parse(xml_with_ns, ns).select("/atom:a").inner_text.strip
+      assert_equal "s", Xml.parse(xml_with_ns, ns).select("/atom:a/foo:b").inner_text
+      assert_equal "s", Xml.parse(xml_with_ns, ns).select("/atom:a").select("./foo:b").inner_text
+      assert_equal "s", Xml.parse(xml_with_ns, ns).select("./atom:a").select("./foo:b").inner_text
+    end
+
+    def test_serialize_to_xml_with_namespace
+      xml_with_ns = '<a xmlns="http://www.w3.org/2005/Atom" xmlns:foo="http://www.foo.com"> <foo:b>s</foo:b> </a>'
+      ns = {'atom' => "http://www.w3.org/2005/Atom", 'foo' => "http://www.foo.com"}
+      assert_equal_ignore_spaces('<foo:b xmlns:foo="http://www.foo.com">s</foo:b>', Xml.parse(xml_with_ns, ns).select("/atom:a/foo:b").raw_xml)
     end
 
     private
