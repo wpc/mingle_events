@@ -15,8 +15,7 @@ module MingleEvents
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
           URIParser.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,103)'),
-          %{ 
-          <?xml version="1.0" encoding="UTF-8"?> 
+          %{<?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
             <result>
               <number>100</number>
@@ -48,8 +47,7 @@ module MingleEvents
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
           URIParser.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100)'),
-          %{ 
-          <?xml version="1.0" encoding="UTF-8"?> 
+          %{<?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
             <result>
               <number>100</number>
@@ -83,8 +81,7 @@ module MingleEvents
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
           URIParser.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100,103)'),
-          %{ 
-          <?xml version="1.0" encoding="UTF-8"?> 
+          %{<?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
             <result>
               <number>100</number>
@@ -126,8 +123,7 @@ module MingleEvents
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
           URIParser.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100)'),
-          %{ 
-          <?xml version="1.0" encoding="UTF-8"?> 
+          %{<?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
             <result>
               <number>100</number>
@@ -139,7 +135,7 @@ module MingleEvents
           }
         )
         dummy_mingle_access.register_page_content('http://example.com?version=11',
-          %{
+                                                  %{
             <card>
               <number type="integer">101</number> 
               <card_type url="https://localhost:7071/api/v2/projects/atlas/card_types/24.xml"> 
@@ -176,8 +172,7 @@ module MingleEvents
         dummy_mingle_access = StubMingleAccess.new
         dummy_mingle_access.register_page_content(
           URIParser.escape('/api/v2/projects/atlas/cards/execute_mql.xml?mql=WHERE number IN (100)'),
-          %{ 
-          <?xml version="1.0" encoding="UTF-8"?> 
+          %{<?xml version="1.0" encoding="UTF-8"?> 
           <results type="array"> 
           </results>
           })

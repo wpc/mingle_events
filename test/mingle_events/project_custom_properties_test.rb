@@ -5,8 +5,7 @@ module MingleEvents
   class ProjectCustomPropertiesTest < Test::Unit::TestCase
   
     def test_can_lookup_property_name_by_column_name
-      property_definitions_xml = %{
-        <?xml version="1.0" encoding="UTF-8"?> 
+      property_definitions_xml = %{<?xml version="1.0" encoding="UTF-8"?> 
         <property_definitions type="array"> 
           <property_definition> 
             <name>Account</name> 

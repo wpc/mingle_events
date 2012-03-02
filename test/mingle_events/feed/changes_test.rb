@@ -47,7 +47,7 @@ module MingleEvents
                 <change type="name-change">
                   <old_value nil="true" />
                   <new_value>Basic email integration</new_value>
-                </change
+                </change>
               </changes>
             </content>
           </entry>}
@@ -131,7 +131,7 @@ module MingleEvents
                 <change type="card-type-change">
                   <old_value>
                     <card_type url="https://mingle.example.com/api/v2/projects/atlas/card_types/30.xml">
-                      <name>Story</name
+                      <name>Story</name>
                     </card_type>
                   </old_value>
                   <new_value>

@@ -17,7 +17,7 @@ module MingleEvents
                 <login>ctester</login> 
                 <email>chester.tester@example.com</email>
               </user>
-            </proejcts_member>
+            </projects_member>
             <projects_member> 
               <user url="http://example.com/users/17.xml"> 
                 <id type="integer">444</id> 
@@ -25,8 +25,8 @@ module MingleEvents
                 <login>jdeveloper</login> 
                 <email>joe.developer@example.com</email>
               </user>
-            </proejcts_member>
-          <projects_members>
+            </projects_member>
+          </projects_members>
           }
         )
         
